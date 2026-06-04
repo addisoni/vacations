@@ -1,0 +1,2945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#063B60">
+  <title>Moorea Trip — Sep 21–Oct 6, 2026</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --ocean:   #0B4D7C;
+      --lagoon:  #0097A7;
+      --sand:    #F5E6C8;
+      --coral:   #E05B42;
+      --palm:    #388E3C;
+      --sky:     #EAF4FB;
+      --text:    #1A2333;
+      --muted:   #667085;
+      --bay-blue:   #1565C0;
+      --cook-purple:#6A1B9A;
+      --fare-teal:  #00796B;
+      --gap-brown:  #5D4037;
+    }
+    html { font-size: 15px; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: var(--sky); color: var(--text); -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+    h1, h2, h3, .sec, .card-title, .stay-banner h2 { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(135deg, #063B60 0%, #0097A7 55%, #00BCD4 100%);
+      color: #fff; padding: 2.2rem 1.5rem 1.8rem; text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='100'%3E%3Cpath d='M0 60 Q50 30 100 60 Q150 90 200 60 Q250 30 300 60 Q350 90 400 60 L400 100 L0 100Z' fill='rgba(255,255,255,0.06)'/%3E%3C/svg%3E") bottom/cover no-repeat;
+      pointer-events: none;
+    }
+    .hero h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.02em; }
+    .hero .subtitle { margin-top: 0.4rem; opacity: 0.88; font-size: 0.95rem; }
+    .hero .meta { margin-top: 0.6rem; font-size: 0.8rem; opacity: 0.72; font-family: monospace; }
+
+    /* ── TABS ── */
+    .tab-nav {
+      display: flex; justify-content: center; flex-wrap: nowrap; background: var(--ocean);
+      overflow-x: auto; scrollbar-width: none;
+      position: -webkit-sticky; position: sticky; top: 0; z-index: 1000;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+      padding-top: env(safe-area-inset-top, 0);
+    }
+    .tab-btn {
+      flex-shrink: 0; padding: 0.85rem 1.2rem;
+      border: none; background: transparent; color: rgba(255,255,255,0.65);
+      cursor: pointer; font-size: 0.83rem; font-weight: 500;
+      white-space: nowrap; border-bottom: 3px solid transparent; transition: all 0.18s;
+      touch-action: manipulation; /* prevent 300ms tap delay */
+      min-height: 44px; /* Apple HIG minimum tap target */
+    }
+    .tab-btn:hover { color: #fff; background: rgba(255,255,255,0.08); }
+    .tab-btn.active { color: #fff; border-bottom-color: #F5C842; background: rgba(255,255,255,0.12); }
+    .tab-btn .btn-label { display: inline; }
+    @media (max-width: 520px) {
+      .tab-btn { padding: 0.85rem 0.65rem; font-size: 1.1rem; }
+      .tab-btn .btn-label { display: none; }
+    }
+
+    .tab-pane { display: none; padding: 1.25rem; max-width: 1080px; margin: 0 auto; will-change: transform; }
+    .tab-pane.active { display: block; }
+
+    /* ── SECTION HEADERS ── */
+    .sec { font-size: 0.76rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+           color: var(--lagoon); margin: 1.5rem 0 0.75rem; padding-bottom: 0.4rem;
+           border-bottom: 2px solid var(--lagoon); }
+
+    /* ── STAY BANNERS ── */
+    .stay-banner { border-radius: 14px; padding: 1.4rem 1.6rem; margin-bottom: 1.25rem; color: #fff; }
+    .stay-banner.bay    { background: linear-gradient(135deg, #1565C0, #42A5F5); }
+    .stay-banner.cook   { background: linear-gradient(135deg, #6A1B9A, #AB47BC); }
+    .stay-banner.fare   { background: linear-gradient(135deg, #00796B, #26C6DA); }
+    .stay-banner .s-icon  { font-size: 1.8rem; margin-bottom: 0.35rem; }
+    .stay-banner h2       { font-size: 1.3rem; font-weight: 700; }
+    .stay-banner .s-sub   { margin-top: 0.3rem; opacity: 0.88; font-size: 0.88rem; }
+    .stay-banner .s-dates { margin-top: 0.5rem; font-size: 0.82rem; opacity: 0.8; }
+
+    /* ── CARDS ── */
+    .card { background: #fff; border-radius: 12px; padding: 1.2rem 1.4rem;
+            margin-bottom: 1rem; box-shadow: 0 1px 5px rgba(0,0,0,0.09); }
+    .card-title { font-weight: 700; font-size: 0.9rem; color: var(--ocean); margin-bottom: 0.85rem; }
+    .info-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 0.85rem; }
+    .info-item label { display: block; font-size: 0.72rem; text-transform: uppercase;
+                       letter-spacing: 0.05em; color: var(--muted); margin-bottom: 0.2rem; }
+    .info-item span { font-weight: 600; font-size: 0.88rem; }
+
+    /* ── CHIPS ── */
+    .chip { display: inline-block; padding: 0.18rem 0.55rem; border-radius: 20px;
+            font-size: 0.72rem; font-weight: 700; margin-right: 0.35rem; margin-top: 0.2rem; }
+    .chip.activity  { background: #FFE0D6; color: #B71C1C; }
+    .chip.transport { background: #DCEDC8; color: #1B5E20; }
+    .chip.checkin   { background: #BBDEFB; color: #0D47A1; }
+    .chip.checkout  { background: #FFF9C4; color: #E65100; }
+    .chip.free      { background: #F3E5F5; color: #4A148C; }
+    .chip.flight    { background: #E8F5E9; color: #1B5E20; }
+
+    /* ── DAY CARDS ── */
+    .day-card { background: #fff; border-radius: 11px; margin-bottom: 0.75rem;
+                overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+    .day-header { background: #f5f7fa; padding: 0.65rem 1rem;
+                  display: flex; align-items: center; justify-content: space-between;
+                  flex-wrap: wrap; gap: 0.4rem; }
+    .day-header .d-date { font-weight: 700; font-size: 0.9rem; }
+    .day-body { padding: 0.85rem 1rem; }
+
+    /* ── TIMELINE ── */
+    .timeline { padding-left: 0.6rem; }
+    .tl-item { border-left: 3px solid #B0BEC5; padding: 0.65rem 0.9rem 0.65rem 1rem;
+               margin-bottom: 0.65rem; border-radius: 0 8px 8px 0; position: relative; }
+    .tl-item::before { content: ''; position: absolute; left: -7px; top: 14px;
+                       width: 11px; height: 11px; border-radius: 50%;
+                       background: #B0BEC5; border: 2px solid #fff; }
+    .tl-item.ev-stay     { border-color: var(--bay-blue);   background: #F0F7FF; }
+    .tl-item.ev-stay::before { background: var(--bay-blue); }
+    .tl-item.ev-cook     { border-color: var(--cook-purple); background: #F9F0FF; }
+    .tl-item.ev-cook::before { background: var(--cook-purple); }
+    .tl-item.ev-fare     { border-color: var(--fare-teal);  background: #F0FAFA; }
+    .tl-item.ev-fare::before { background: var(--fare-teal); }
+    .tl-item.ev-activity { border-color: var(--coral);      background: #FFF7F5; }
+    .tl-item.ev-activity::before { background: var(--coral); }
+    .tl-item.ev-transport{ border-color: var(--palm);       background: #F2FAF2; }
+    .tl-item.ev-transport::before { background: var(--palm); }
+    .tl-item.ev-warn     { border-color: #FF8F00;           background: #FFFDE7; }
+    .tl-item.ev-warn::before { background: #FF8F00; }
+    .tl-item.ev-flight   { border-color: #1B5E20;           background: #E8F5E9; }
+    .tl-item.ev-flight::before { background: #1B5E20; }
+
+    .tl-time  { font-size: 0.73rem; color: var(--muted); margin-bottom: 0.18rem; }
+    .tl-title { font-weight: 700; font-size: 0.9rem; }
+    .tl-note  { font-size: 0.8rem; color: var(--muted); margin-top: 0.2rem; line-height: 1.5; }
+    .tl-warn  { font-size: 0.8rem; color: #E65100; font-weight: 700; margin-top: 0.25rem; }
+
+    /* ── REF ── */
+    .ref { font-family: monospace; background: #f4f4f4; padding: 0.15rem 0.45rem;
+           border-radius: 4px; font-size: 0.82rem; cursor: pointer; user-select: all; }
+    .ref:active { background: #c8e6c9; }
+
+    /* ── TABLE ── */
+    .ref-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .ref-table td { padding: 0.45rem 0.25rem; border-bottom: 1px solid #eee; }
+    .ref-table td:first-child { color: var(--muted); width: 30%; }
+
+    /* ── MAP ── */
+    #map { height: 440px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 5px rgba(0,0,0,0.12); isolation: isolate; overscroll-behavior: none; touch-action: pan-x pan-y; }
+    #map .leaflet-control-attribution { display: none; }
+    /* Keep all Leaflet controls inside the map's stacking context */
+    .leaflet-top, .leaflet-bottom { z-index: 400; }
+    .leaflet-pane { z-index: 200; }
+    .leaflet-control-container { z-index: 400; }
+    .map-legend { display: flex; flex-wrap: wrap; gap: 0.75rem; margin: 0.65rem 0; font-size: 0.8rem; }
+    .legend-item { display: flex; align-items: center; gap: 0.35rem; }
+    .legend-item.clickable { cursor: pointer; padding: 0.2rem 0.4rem; border-radius: 6px; transition: background 0.15s; }
+    .legend-item.clickable:hover { background: rgba(0,0,0,0.08); }
+
+    /* ── FILTER FAB ── */
+    .fab-label { font-size: 0.72rem; }
+    @media (max-width: 400px) { .fab-label { display: none; } }
+    /* Push tab pane content above FAB so nothing is hidden behind it */
+    .tab-pane { padding-bottom: 5.5rem !important; }
+    body.dark #offline-banner { background: #1c2230; border-bottom: 1px solid #30363d; }
+
+    /* ── HERO FILTER LEGEND ── */
+    .hero-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.4rem; margin: 0.85rem 0 0.3rem; }
+    .hlbtn {
+      display: flex; align-items: center; gap: 0.3rem;
+      padding: 0.28rem 0.75rem; border-radius: 20px;
+      font-size: 0.78rem; font-weight: 600; cursor: pointer;
+      background: rgba(255,255,255,0.13); color: rgba(255,255,255,0.88);
+      border: 1.5px solid rgba(255,255,255,0.22); transition: all 0.18s;
+    }
+    .hlbtn:hover  { background: rgba(255,255,255,0.24); color: #fff; }
+    .hlbtn.fon    { background: rgba(255,255,255,0.95); color: #0B4D7C; border-color: #F5C842; box-shadow: 0 0 0 2px #F5C842; }
+    .hldot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+    /* ── CALENDAR FILTER ── */
+    .cal-ev.fdim { opacity: 0.1 !important; pointer-events: none; }
+    .cal-ev.fdim-bnb { opacity: 0.35 !important; }
+    .cal-day.in-trip.fdim .cal-num { opacity: 0.3; }
+    /* Must Go-To table row filter */
+    .must-row-dim { opacity: 0.01; transition: opacity 0.2s; }
+    .must-row-near { opacity: 0.20; transition: opacity 0.2s; }
+    .must-row-match { transition: opacity 0.2s; }
+    .must-row-match td:first-child { font-weight: 700; }
+    /* Been There row */
+    /* Been There — strikethrough first 3 columns, keep checkbox column intact */
+    .been-there td { text-decoration: line-through; opacity: 0.45; }
+    .been-there td:last-child { text-decoration: none; opacity: 1; }
+    /* Budget XPF amounts */
+    .xpf-val { display: block; font-size:0.75rem; color:var(--muted); }
+    /* Table headers — dark-mode friendly */
+    .tbl-head { background: var(--ocean) !important; }
+    .tbl-head td { color: #fff !important; font-weight: 700 !important; border-bottom: none; }
+    .tbl-total { background: #E8F4FD; border-top: 2px solid var(--ocean); }
+    .tbl-total td { color: var(--ocean); font-weight: 700; }
+    body.dark .tbl-total { background: #0a2050; }
+    body.dark .tbl-total td { color: #90CAF9; }
+    /* My Location button */
+    .map-myloc {
+      position: absolute; bottom: 46px; right: 10px; z-index: 500;
+      background: #fff; border: 2px solid rgba(0,0,0,0.2); border-radius: 4px;
+      width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 1.25rem; line-height: 1;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    }
+    .map-myloc:hover { background: #f4f4f4; }
+    /* Fullscreen map */
+    #map.map-fullscreen { position:fixed !important; top:0; left:0; right:0; bottom:0; height:100dvh !important; z-index:9000; border-radius:0 !important; margin:0; }
+    .map-fs-btn { position:absolute; bottom:10px; right:10px; z-index:500; background:#fff; border:2px solid rgba(0,0,0,0.2); border-radius:4px; width:34px; height:34px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:1.25rem; line-height:1; box-shadow:0 1px 4px rgba(0,0,0,0.3); }
+    .map-fs-btn:hover { background:#f4f4f4; }
+    .cal-day.in-trip.fdim { background: rgba(255,255,255,0.4) !important; }
+    .legend-dot { width: 11px; height: 11px; border-radius: 50%; border: 1.5px solid rgba(0,0,0,0.15); }
+
+    /* ── CALENDAR ── */
+    .cal-wrap { background: #fff; border-radius: 12px; padding: 1rem;
+                box-shadow: 0 1px 5px rgba(0,0,0,0.09); overflow-x: auto; }
+    .wday-labels { display: grid; grid-template-columns: repeat(7,1fr); gap: 3px; margin-bottom: 3px; }
+    .wdl { text-align: center; font-size: 0.72rem; font-weight: 700; color: var(--muted); padding: 0.3rem 0; }
+    .cal-grid { display: grid; gap: 4px; }
+    .cal-week { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; }
+    .cal-day  { border-radius: 8px; padding: 0.45rem 0.5rem; min-height: 80px; min-width: 75px;
+                background: #f8f9fb; }
+    .cal-day.in-trip    { background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.07); }
+    .cal-day.is-flight  { border-top: 3px solid #0277BD; }
+    .cal-day.is-checkin { border-top: 3px solid var(--bay-blue); }
+    .cal-day.is-checkin2{ border-top: 3px solid var(--cook-purple); }
+    .cal-day.is-checkin3{ border-top: 3px solid var(--fare-teal); }
+    .cal-day.is-checkout{ border-top: 3px solid #FF8F00; }
+    .cal-day.out-range  { opacity: 0.32; background: #f0f0f0; }
+    .cal-num  { font-weight: 700; font-size: 0.85rem; margin-bottom: 0.3rem; }
+    .cal-mon  { font-size: 0.65rem; color: var(--muted); font-weight: normal; }
+    .cal-ev   { font-size: 0.67rem; font-weight: 600; border-radius: 3px;
+                padding: 0.1rem 0.3rem; margin-bottom: 0.2rem;
+                white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    /* Stay colors — each property has its own hue */
+    .cal-ev.bay    { background: #1565C0; color: #fff; }   /* BnB — blue   */
+    .cal-ev.cook   { background: #6A1B9A; color: #fff; }   /* BnB — purple */
+    .cal-ev.fare   { background: #00796B; color: #fff; }   /* BnB — teal   */
+    /* Papeete city stay — urban slate */
+    .cal-ev.pap    { background: #37474F; color: #fff; }
+    .cal-day.is-checkin4{ border-top: 3px solid #37474F; }
+    /* Activity / Excursion — warm amber */
+    .cal-ev.act    { background: #F57C00; color: #fff; }
+    /* Transport (car rental) — forest green */
+    .cal-ev.trns   { background: #2E7D32; color: #fff; }
+    /* Flights — sky blue */
+    .cal-ev.flight { background: #0277BD; color: #fff; }
+    .cal-ev.clickable { cursor: pointer; transition: filter 0.15s, transform 0.15s; }
+    .cal-ev.clickable:hover { filter: brightness(1.25); transform: scale(1.04); }
+    .cal-ev.flash { animation: calFlash 0.55s ease; }
+    @keyframes calFlash { 0%,100%{opacity:1} 40%{opacity:0.25} }
+    /* Calendar week expand (pinch/solo) */
+    .cal-week.week-hidden { display: none; }
+    .cal-week-back { display:none; background:var(--ocean); color:#fff; border:none; border-radius:8px;
+                     padding:0.3rem 0.9rem; font-size:0.78rem; font-weight:700; cursor:pointer;
+                     margin-bottom:0.5rem; touch-action:manipulation; }
+    .cal-week-back.visible { display:block; }
+    /* Cached indicator badge */
+    #cache-badge { display:none; position:fixed; bottom:calc(env(safe-area-inset-bottom,0) + 4.5rem);
+                   right:0.75rem; background:#2E7D32; color:#fff; border-radius:20px;
+                   padding:0.25rem 0.65rem; font-size:0.72rem; font-weight:700;
+                   z-index:998; box-shadow:0 2px 8px rgba(0,0,0,0.25); pointer-events:none; }
+    @keyframes fadeInOut { 0%{opacity:0;transform:translateY(6px)} 15%{opacity:1;transform:none} 75%{opacity:1} 100%{opacity:0} }
+    /* Budget editable amounts */
+    .budget-amt { cursor:text; border-bottom:1px dashed rgba(0,0,0,0.2); outline:none; min-width:60px; display:inline-block; }
+    .budget-amt:focus { border-bottom-color:var(--lagoon); background:rgba(0,151,167,0.07); border-radius:3px; padding:0 2px; }
+    body.dark .budget-amt { border-bottom-color:rgba(255,255,255,0.3); }
+    /* Calendar legend */
+    .cal-legend { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; font-size: 0.72rem; }
+    .cl-item { display: flex; align-items: center; gap: 0.3rem; }
+    .cl-swatch { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+
+    /* ── ALERT ── */
+    .alert { border-radius: 10px; padding: 1rem 1.2rem; margin-bottom: 1rem; font-size: 0.88rem; }
+    .alert.warn { background: #FFF8E1; border: 1px solid #FFD54F; }
+    .alert.info { background: #E3F2FD; border: 1px solid #90CAF9; }
+
+    /* ── TWO-COL ── */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 600px) { .two-col { grid-template-columns: 1fr; } }
+
+    /* ── WEATHER WIDGET ── */
+    .weather-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:0.75rem; font-size:0.85rem; }
+    .weather-cell { text-align:center; padding:0.6rem 0.4rem; background:var(--sky); border-radius:8px; }
+    body.dark .weather-cell { background:#1c2230; }
+
+    a { color: var(--lagoon); text-decoration: none; touch-action: manipulation; }
+    a:hover { text-decoration: underline; }
+    /* Global tap delay fix for all interactive elements */
+    button, input, label, select { touch-action: manipulation; }
+    /* Larger checkbox tap targets (Apple HIG 44pt minimum) */
+    input[type=checkbox] { min-width: 20px; min-height: 20px; }
+    /* Safe area padding for iPhone notch / Dynamic Island in standalone PWA mode */
+    body { padding-bottom: env(safe-area-inset-bottom, 0); }
+    /* PWA install banner */
+    #pwa-banner {
+      display: none; position: fixed; bottom: calc(env(safe-area-inset-bottom,0) + 0.75rem);
+      left: 50%; transform: translateX(-50%);
+      background: var(--ocean); color: #fff; border-radius: 12px;
+      padding: 0.75rem 1.25rem; font-size: 0.85rem; font-weight: 600;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.35); z-index: 9998;
+      display: flex; align-items: center; gap: 0.75rem; max-width: 90vw;
+    }
+    #pwa-banner.hidden { display: none !important; }
+    #pwa-banner button { background: #F5C842; color: #0B4D7C; border: none; border-radius: 8px; padding: 0.35rem 0.85rem; font-weight: 700; cursor: pointer; touch-action: manipulation; min-height: 44px; }
+    #pwa-banner .pwa-close { background: none; color: rgba(255,255,255,0.7); font-size: 1.1rem; padding: 0.2rem 0.4rem; min-height: 44px; }
+
+    /* ── DARK MODE EXTRA FIXES ── */
+    /* Green host-note card (From Adrien / From host) */
+    body.dark .host-note  { background: #0a2010 !important; border-color: #2e5c2e !important; color: #a5d6a7 !important; }
+    body.dark .host-note a { color: #80cbc4; }
+    /* Papeete tl-item */
+    body.dark .tl-papeete { background: #1a2430 !important; border-color: #37474F !important; }
+    body.dark .tl-papeete .tl-title { color: #e6edf3; }
+    /* Calendar day numbers and wday labels */
+    body.dark .cal-num   { color: #e6edf3; }
+    body.dark .wdl       { color: #8b949e; }
+    body.dark .cal-day.out-range .cal-num { color: #4a4a5a; }
+    /* flight chip */
+    body.dark .tl-item.ev-flight { background: #0a200a !important; }
+    body.dark .chip.flight { background: #0a200a; color: #a5d6a7; }
+
+    /* ── MAP LINK BUTTON ── */
+    .map-link { display: inline-block; font-size: 0.72rem; font-weight: 600;
+                padding: 0.15rem 0.5rem; background: #E3F2FD; color: #0D47A1;
+                border-radius: 10px; margin-top: 0.3rem; margin-right: 0.4rem;
+                text-decoration: none !important; border: none; cursor: pointer; }
+    .map-link:hover { background: #BBDEFB; }
+    .book-link { display: inline-block; font-size: 0.72rem; font-weight: 600;
+                 padding: 0.15rem 0.5rem; background: #FFF3E0; color: #E65100;
+                 border-radius: 10px; margin-top: 0.3rem;
+                 text-decoration: none !important; }
+    .book-link:hover { background: #FFE0B2; }
+    body.dark .map-link  { background: #0a2050; color: #90CAF9; }
+    body.dark .book-link { background: #2a1008; color: #FFAB40; }
+
+    /* ── SCROLL ENTRANCE ANIMATIONS ── */
+    .day-card { opacity: 0; transform: translateY(10px);
+                transition: opacity 0.3s ease, transform 0.3s ease; }
+    .day-card.visible { opacity: 1; transform: none; }
+    @media (prefers-reduced-motion: reduce) { .day-card { opacity:1; transform:none; } }
+
+    /* ── PRINT ── */
+    @media print {
+      body { background: #fff !important; color: #000 !important; font-size: 11pt; }
+      .dark-toggle, .tab-nav, .map-legend, #map,
+      .cal-ev.clickable, .legend-item { display: none !important; }
+      .tab-pane { display: block !important; padding: 0; page-break-after: always; }
+      .stay-banner { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .day-card { opacity: 1 !important; transform: none !important;
+                  box-shadow: none; border: 1px solid #ddd; break-inside: avoid; }
+      .two-col { grid-template-columns: 1fr !important; }
+      .cal-wrap { display: none; }
+      h1 { font-size: 20pt; }
+      a::after { content: none; }
+    }
+
+    /* ── DARK MODE ── */
+    body.dark { --sky:#0d1117; --text:#e6edf3; --muted:#8b949e; }
+    body.dark .card          { background:#161b22; }
+    body.dark .day-card      { background:#161b22; }
+    body.dark .cal-wrap      { background:#161b22; }
+    body.dark .cal-day.in-trip{ background:#1c2230; }
+    body.dark .cal-day.out-range{ background:#0d1117; }
+    body.dark .tab-nav       { background:#010409; }
+    body.dark .day-header    { background:#1c2230; }
+    body.dark .tl-item.ev-stay  { background:#0a2030; }
+    body.dark .tl-item.ev-stay2 { background:#0a2020; }
+    body.dark .tl-item.ev-fare  { background:#0a2020; }
+    body.dark .tl-item.ev-activity{ background:#2a1008; }
+    body.dark .tl-item.ev-transport{ background:#0a200a; }
+    body.dark .tl-item.ev-warn  { background:#201800; }
+    body.dark .tl-item.ev-flight{ background:#0a200a; }
+    body.dark .tl-item.ev-cook  { background:#1a0830; }
+    body.dark .ref           { background:#1c2230; color:#e6edf3; }
+    body.dark .alert.info    { background:#0a1428; border-color:#1565C0; }
+    body.dark .ref-table td  { border-color:#30363d; }
+    .dark-toggle {
+      position: fixed; top: 0.75rem; right: 0.75rem; z-index: 200;
+      background: rgba(255,255,255,0.15); border: none; border-radius: 20px;
+      padding: 0.3rem 0.7rem; cursor: pointer; font-size: 0.85rem; color: #fff;
+      backdrop-filter: blur(4px); transition: background 0.2s;
+    }
+    .dark-toggle:hover { background: rgba(255,255,255,0.25); }
+
+    /* ── TODAY HIGHLIGHT ── */
+    .cal-day.is-today { outline: 2px solid #F5C842; outline-offset: -2px; }
+    .cal-day.is-today .cal-num { color: #F5C842; font-weight: 900; }
+
+    /* ── WEEK COLLAPSE ── */
+    .week-toggle { display:none; }
+    @media (max-width: 640px) {
+      .week-toggle {
+        display: flex; align-items: center; gap: 0.4rem;
+        font-size: 0.75rem; font-weight: 700; color: var(--muted);
+        background: none; border: none; cursor: pointer; padding: 0.3rem 0; margin-bottom: 2px;
+      }
+      .cal-week.collapsed { display: none; }
+    }
+
+    /* ── CHECKLIST ── */
+    .checklist-wrap { margin-top: 1rem; }
+    .checklist-wrap summary {
+      cursor: pointer; font-weight: 700; font-size: 0.88rem;
+      color: var(--ocean); padding: 0.5rem 0; user-select: none;
+      list-style: none; display: flex; align-items: center; gap: 0.4rem;
+    }
+    .checklist-wrap summary::before { content: '▶'; font-size: 0.65rem; transition: transform 0.2s; }
+    .checklist-wrap[open] summary::before { transform: rotate(90deg); }
+    .checklist-wrap ul { list-style: none; padding: 0.5rem 0 0; }
+    .checklist-wrap li { display: flex; align-items: flex-start; gap: 0.5rem; margin-bottom: 0.4rem; font-size: 0.85rem; }
+    .checklist-wrap input[type=checkbox] { margin-top: 2px; cursor: pointer; accent-color: var(--lagoon); flex-shrink: 0; }
+    .checklist-wrap li.checked label { text-decoration: line-through; color: var(--muted); }
+  </style>
+</head>
+<body>
+
+<div id="cache-badge"></div>
+
+<div id="pwa-banner" class="hidden">
+  🌺 Save to Home Screen for offline access
+  <button onclick="document.getElementById('pwa-banner').classList.add('hidden');localStorage.setItem('pwa-dismissed','1');">Add to Home</button>
+  <button class="pwa-close" onclick="document.getElementById('pwa-banner').classList.add('hidden');localStorage.setItem('pwa-dismissed','1');">✕</button>
+</div>
+
+<button class="dark-toggle" id="darkBtn" onclick="toggleDark()">🌙 Dark</button>
+<div id="local-ip-badge" style="display:none;position:fixed;top:0.6rem;left:0.75rem;z-index:1100;background:rgba(11,77,124,0.88);color:#fff;font-size:0.7rem;font-weight:600;padding:0.25rem 0.6rem;border-radius:20px;backdrop-filter:blur(4px);letter-spacing:0.02em;cursor:pointer;" title="Tap to copy URL" onclick="copyLocalURL()"></div>
+
+<!-- HERO -->
+<div class="hero">
+  <div style="font-size:2.2rem;margin-bottom:0.4rem;">🌺</div>
+  <h1>Moorea, French Polynesia</h1>
+  <div class="subtitle">September 18 – October 7, 2026</div>
+  <div id="countdown" style="margin-top:0.6rem;font-size:1rem;font-weight:700;opacity:0.95;"></div>
+</div>
+
+<!-- OFFLINE BANNER -->
+<div id="offline-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:#37474F;color:#fff;text-align:center;padding:0.5rem 1rem;font-size:0.85rem;font-weight:600;">
+  📶 You're offline — viewing cached trip data
+</div>
+
+<!-- FILTER FAB -->
+<div id="filter-fab" aria-label="Filter map and calendar" style="
+  position:fixed; bottom:calc(env(safe-area-inset-bottom,0) + 1rem); left:50%; transform:translateX(-50%);
+  z-index:999; display:flex; flex-wrap:wrap; justify-content:center; gap:0.35rem;
+  background:rgba(11,77,124,0.96); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+  border-radius:50px; padding:0.55rem 0.85rem;
+  box-shadow:0 4px 20px rgba(0,0,0,0.4); max-width:96vw;">
+  <button class="hlbtn" data-filter="bay"    data-pin="bay"     onclick="setCalFilter('bay',   'bay')"><span class="hldot" style="background:#1565C0"></span><span class="fab-label">Cook's Bay</span></button>
+  <button class="hlbtn" data-filter="cook"   data-pin="cook"    onclick="setCalFilter('cook',  'cook')"><span class="hldot" style="background:#6A1B9A"></span><span class="fab-label">Piha'ena</span></button>
+  <button class="hlbtn" data-filter="fare"   data-pin="fare"    onclick="setCalFilter('fare',  'fare')"><span class="hldot" style="background:#00796B"></span><span class="fab-label">Tiahura</span></button>
+  <button class="hlbtn" data-filter="pap"    data-pin="papeete" onclick="setCalFilter('pap',   'papeete')"><span class="hldot" style="background:#37474F"></span><span class="fab-label">Papeete BnB</span></button>
+  <button class="hlbtn" data-filter="act"    data-pin="atv"     onclick="setCalFilter('act',   'atv')"><span class="hldot" style="background:#F57C00"></span><span class="fab-label">Activity</span></button>
+  <button class="hlbtn" data-filter="trns"   data-pin="vaiare"  onclick="setCalFilter('trns',  'vaiare')"><span class="hldot" style="background:#E53935"></span><span class="fab-label">Avis</span></button>
+  <button class="hlbtn" data-filter="flight" data-pin=""        onclick="setCalFilter('flight','')"><span class="hldot" style="background:#0277BD"></span><span class="fab-label">Flight</span></button>
+</div>
+
+<!-- TABS -->
+<nav class="tab-nav" role="navigation" aria-label="Trip sections">
+  <button class="tab-btn active" id="btn-overview" onclick="showTab('overview',this)">🗺&nbsp;<span class="btn-label"> Overview &amp; Map</span></button>
+  <button class="tab-btn"        id="btn-stay1"    onclick="showTab('stay1',   this)">🏡&nbsp;<span class="btn-label"> Cook's Bay BnB (Sep 21–26)</span></button>
+  <button class="tab-btn"        id="btn-stay2"    onclick="showTab('stay2',   this)">🌴&nbsp;<span class="btn-label"> Piha'ena BnB (Sep 26–Oct 1)</span></button>
+  <button class="tab-btn"        id="btn-stay3"    onclick="showTab('stay3',   this)">🌊&nbsp;<span class="btn-label"> Tiahura BnB (Oct 1–6)</span></button>
+  <button class="tab-btn"        id="btn-stay4"    onclick="showTab('stay4',   this)">🏙&nbsp;<span class="btn-label"> Papeete Studio (Oct 6–7)</span></button>
+  <button class="tab-btn"        id="btn-budget"   onclick="showTab('budget',  this)">💰&nbsp;<span class="btn-label"> Budget &amp; Currency</span></button>
+</nav>
+
+
+<!-- ═══════════════ OVERVIEW ═══════════════ -->
+<div id="pane-overview" class="tab-pane active" role="main" aria-label="Overview and Map">
+
+  <div class="sec">Full Calendar — Sep 18 to Oct 7</div>
+  <button id="cal-back-btn" class="cal-week-back" onclick="expandWeek(null)">← All Weeks</button>
+  <div class="cal-wrap">
+    <div class="wday-labels">
+      <div class="wdl">SUN</div><div class="wdl">MON</div><div class="wdl">TUE</div>
+      <div class="wdl">WED</div><div class="wdl">THU</div><div class="wdl">FRI</div><div class="wdl">SAT</div>
+    </div>
+    <div class="cal-grid">
+
+      <!-- WEEK 0: Sep 13–19 (SF hotel Sep 18-19) -->
+      <div class="cal-week">
+        <div class="cal-day out-range"><div class="cal-num">13 <span class="cal-mon">Sep</span></div></div>
+        <div class="cal-day out-range"><div class="cal-num">14</div></div>
+        <div class="cal-day out-range"><div class="cal-num">15</div></div>
+        <div class="cal-day out-range"><div class="cal-num">16</div></div>
+        <div class="cal-day out-range"><div class="cal-num">17</div></div>
+        <div class="cal-day in-trip" style="border-top:3px solid #6D4C41;">
+          <div class="cal-num">18</div>
+          <div class="cal-ev" style="background:#546E7A;color:#fff;font-size:0.67rem;font-weight:600;border-radius:3px;padding:0.1rem 0.3rem;margin-bottom:0.2rem;">SF Hotel</div>
+        </div>
+        <div class="cal-day in-trip" style="border-top:3px solid #6D4C41;">
+          <div class="cal-num">19</div>
+          <div class="cal-ev" style="background:#546E7A;color:#fff;font-size:0.67rem;font-weight:600;border-radius:3px;padding:0.1rem 0.3rem;margin-bottom:0.2rem;">SF Hotel</div>
+        </div>
+      </div>
+
+      <!-- WEEK 1: Sep 20–26 -->
+      <div class="cal-week">
+        <!-- Sun Sep 20 -->
+        <div class="cal-day in-trip is-flight" data-date="9-20">
+          <div class="cal-num">20 <span class="cal-mon">Sep</span></div>
+          <div class="cal-ev flight">✈ SFO→Tahiti ~8h</div>
+        </div>
+        <!-- Mon Sep 21 -->
+        <div class="cal-day in-trip is-checkin" data-date="9-21">
+          <div class="cal-num">21</div>
+          <div class="cal-ev trns clickable" onclick="setCalFilter('trns','vaiare')">6:30am Avis Pickup</div>
+          <div class="cal-ev bay clickable" onclick="setCalFilter('bay','bay')">Check-in 3pm</div>
+        </div>
+        <!-- Tue Sep 22 -->
+        <div class="cal-day in-trip" data-date="9-22">
+          <div class="cal-num">22</div>
+          <div class="cal-ev bay clickable" onclick="setCalFilter('bay','bay')">Cook's Bay BnB</div>
+          <div class="cal-ev act clickable" onclick="setCalFilter('act','tiki')">Sunset Boat 4pm</div>
+        </div>
+        <!-- Wed Sep 23 -->
+        <div class="cal-day in-trip" data-date="9-23">
+          <div class="cal-num">23</div>
+          <div class="cal-ev bay clickable" onclick="setCalFilter('bay','bay')">Cook's Bay BnB</div>
+        </div>
+        <!-- Thu Sep 24 -->
+        <div class="cal-day in-trip" data-date="9-24">
+          <div class="cal-num">24</div>
+          <div class="cal-ev bay clickable" onclick="setCalFilter('bay','bay')">Cook's Bay BnB</div>
+          <div class="cal-ev act clickable" onclick="setCalFilter('act','aroa')">Plantation 8am</div>
+        </div>
+        <!-- Fri Sep 25 -->
+        <div class="cal-day in-trip" data-date="9-25">
+          <div class="cal-num">25</div>
+          <div class="cal-ev bay clickable" onclick="setCalFilter('bay','bay')">Cook's Bay BnB</div>
+        </div>
+        <!-- Sat Sep 26 -->
+        <div class="cal-day in-trip is-checkin2" data-date="9-26">
+          <div class="cal-num">26</div>
+          <div class="cal-ev bay clickable" onclick="setCalFilter('bay','bay')">Checkout 11am</div>
+          <div class="cal-ev cook clickable" onclick="setCalFilter('cook','cook')">Check-in 3pm</div>
+        </div>
+      </div>
+
+      <!-- WEEK 2: Sep 27–Oct 3 -->
+      <div class="cal-week">
+        <!-- Sun Sep 27 -->
+        <div class="cal-day in-trip" data-date="9-27">
+          <div class="cal-num">27</div>
+          <div class="cal-ev cook clickable" onclick="setCalFilter('cook','cook')">Piha'ena BnB</div>
+        </div>
+        <!-- Mon Sep 28 -->
+        <div class="cal-day in-trip" data-date="9-28">
+          <div class="cal-num">28</div>
+          <div class="cal-ev cook clickable" onclick="setCalFilter('cook','cook')">Piha'ena BnB</div>
+          <div class="cal-ev act clickable" onclick="setCalFilter('act','atv')">ATV Tour 1pm</div>
+        </div>
+        <!-- Tue Sep 29 -->
+        <div class="cal-day in-trip" data-date="9-29">
+          <div class="cal-num">29</div>
+          <div class="cal-ev cook clickable" onclick="setCalFilter('cook','cook')">Piha'ena BnB</div>
+          <div class="cal-ev act clickable" onclick="setCalFilter('act','massage')">Massage 10:30pm</div>
+        </div>
+        <!-- Wed Sep 30 -->
+        <div class="cal-day in-trip" data-date="9-30">
+          <div class="cal-num">30</div>
+          <div class="cal-ev cook clickable" onclick="setCalFilter('cook','cook')">Piha'ena BnB</div>
+          <div class="cal-ev act clickable" onclick="setCalFilter('act','jetski')">Jetski 1pm</div>
+        </div>
+        <!-- Thu Oct 1 -->
+        <div class="cal-day in-trip is-checkin3" data-date="10-1">
+          <div class="cal-num">1 <span class="cal-mon">Oct</span></div>
+          <div class="cal-ev cook clickable" onclick="setCalFilter('cook','cook')">Checkout</div>
+          <div class="cal-ev fare clickable" onclick="setCalFilter('fare','fare')">Check-in 4pm</div>
+        </div>
+        <!-- Fri Oct 2 -->
+        <div class="cal-day in-trip" data-date="10-2">
+          <div class="cal-num">2</div>
+          <div class="cal-ev fare clickable" onclick="setCalFilter('fare','fare')">Tiahura BnB</div>
+          <div class="cal-ev act clickable" onclick="setCalFilter('act','aquablue')">Scuba Dive</div>
+        </div>
+        <!-- Sat Oct 3 -->
+        <div class="cal-day in-trip" data-date="10-3">
+          <div class="cal-num">3</div>
+          <div class="cal-ev fare clickable" onclick="setCalFilter('fare','fare')">Tiahura BnB</div>
+          <div class="cal-ev act clickable" onclick="setCalFilter('act','tipnautic')">⛵ TipNautic 10:15</div>
+          <div class="cal-ev act clickable" onclick="panToPlaceOnMap('cocobeach')">🍽 Coco Beach 12pm</div>
+        </div>
+      </div>
+
+      <!-- WEEK 3: Oct 4–10 -->
+      <div class="cal-week">
+        <!-- Sun Oct 4 -->
+        <div class="cal-day in-trip" data-date="10-4">
+          <div class="cal-num">4</div>
+          <div class="cal-ev fare clickable" onclick="setCalFilter('fare','fare')">Tiahura BnB</div>
+        </div>
+        <!-- Mon Oct 5 -->
+        <div class="cal-day in-trip" data-date="10-5">
+          <div class="cal-num">5</div>
+          <div class="cal-ev fare clickable" onclick="setCalFilter('fare','fare')">Tiahura BnB</div>
+        </div>
+        <!-- Tue Oct 6 -->
+        <div class="cal-day in-trip is-checkin4" data-date="10-6">
+          <div class="cal-num">6</div>
+          <div class="cal-ev fare clickable" onclick="setCalFilter('fare','fare')">Checkout 10am</div>
+          <div class="cal-ev trns clickable" onclick="setCalFilter('trns','vaiare')">Avis Return 5pm</div>
+          <div class="cal-ev pap clickable" onclick="setCalFilter('pap','papeete')">Papeete Check-in</div>
+        </div>
+        <!-- Wed Oct 7 -->
+        <div class="cal-day in-trip is-flight" data-date="10-7">
+          <div class="cal-num">7</div>
+          <div class="cal-ev pap clickable" onclick="setCalFilter('pap','papeete')">Checkout</div>
+          <div class="cal-ev flight">✈ Tahiti→SFO ~8h</div>
+        </div>
+        <div class="cal-day out-range"><div class="cal-num">8</div></div>
+        <div class="cal-day out-range"><div class="cal-num">9</div></div>
+        <div class="cal-day out-range"><div class="cal-num">10</div></div>
+      </div>
+
+    </div>
+  </div>
+  <p style="font-size:0.72rem;color:var(--muted);margin-top:0.5rem;">· Click any event to jump to map pin &nbsp;·&nbsp; Click legend buttons above to filter &nbsp;·&nbsp; <span id="cache-size-display" style="color:var(--lagoon);">💾 Calculating cache…</span></p>
+
+  <div class="sec">Full Trip Map</div>
+  <div id="map"></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;margin-top:0.4rem;">
+    <p style="font-size:0.72rem;color:var(--muted);margin:0;">
+      <span style="display:inline-block;width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:11px solid #2E7D32;vertical-align:middle;margin-right:0.3rem;"></span>Experiences &amp; Sights &nbsp;
+      <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#00ACC1;vertical-align:middle;margin-right:0.3rem;"></span>Beaches &nbsp;
+      <span style="display:inline-block;width:10px;height:10px;background:#FB8C00;vertical-align:middle;margin-right:0.3rem;"></span>Restaurants &nbsp;
+      <span style="display:inline-block;width:12px;height:12px;background:#E65100;clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);vertical-align:middle;margin-right:0.3rem;"></span>Reserved Excursions &nbsp;
+      <em>· Toggle layers in the control (top-right of map)</em>
+    </p>
+    <label style="display:inline-flex;align-items:center;gap:0.45rem;font-size:0.75rem;color:var(--muted);cursor:pointer;user-select:none;">
+      <span>km</span>
+      <span style="position:relative;display:inline-block;width:36px;height:20px;">
+        <input type="checkbox" id="units-toggle" style="opacity:0;width:0;height:0;position:absolute;" onchange="setDistUnits(this.checked)">
+        <span id="units-track" style="position:absolute;inset:0;background:#ccc;border-radius:20px;transition:background 0.2s;"></span>
+        <span id="units-thumb" style="position:absolute;top:3px;left:3px;width:14px;height:14px;background:#fff;border-radius:50%;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></span>
+      </span>
+      <span>mi</span>
+    </label>
+  </div>
+  </p>
+
+  <!-- Windy overlay panel — shown/hidden by layer control toggle -->
+  <div id="windy-panel" style="display:none;margin-top:0.75rem;">
+    <iframe
+      src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=°C&metricWind=km/h&zoom=9&overlay=wind&product=ecmwf&level=surface&lat=-17.5&lon=-149.85"
+      width="100%" height="440" frameborder="0"
+      style="border-radius:12px;display:block;box-shadow:0 1px 5px rgba(0,0,0,0.12);" loading="lazy" allowfullscreen>
+    </iframe>
+    <p style="font-size:0.75rem;color:var(--muted);margin-top:0.4rem;">🌀 Windy — tap the layer selector (top-left) to switch between wind, rain, temperature &amp; clouds.</p>
+  </div>
+
+
+  <div class="sec">Must Go-To Places 📍</div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <table class="ref-table" style="font-size:0.85rem;">
+      <tr class="tbl-head">
+        <td style="padding:0.6rem 1rem;font-weight:700;color:var(--ocean);cursor:pointer;user-select:none;" onclick="sortTable(0)">Place <span style="font-size:0.7rem;font-weight:400;color:var(--muted);">(click → map)</span><span class="sort-arrow"></span></td>
+        <td style="padding:0.6rem 1rem;font-weight:700;color:var(--ocean);cursor:pointer;user-select:none;" onclick="sortTable(1)">Notes<span class="sort-arrow"></span></td>
+        <td style="padding:0.6rem 1rem;font-weight:700;color:var(--ocean);white-space:nowrap;cursor:pointer;user-select:none;" onclick="sortTable(2)">Nearest Stay <span style="font-size:0.7rem;font-weight:400;color:var(--muted);">(~drive)</span><span class="sort-arrow"></span></td>
+        <td style="padding:0.6rem 1rem;font-weight:700;color:var(--ocean);text-align:center;">📍</td>
+      </tr>
+      <tr class="tbl-head">
+        <td colspan="4" style="padding:0.55rem 1rem;font-size:0.76rem;text-transform:uppercase;letter-spacing:0.08em;">🌿 Experiences &amp; Sights</td>
+      </tr>
+      <tr data-nearest=""><td style="padding:0.6rem 1rem;" onclick="panToPlaceOnMap('afareaitu')" style="cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px;">💧 Afareaitu Waterfall</td><td style="padding:0.6rem 1rem;">Short hike to a stunning waterfall · South side near Afareaitu village</td><td style="padding:0.6rem 1rem;white-space:nowrap;font-size:0.8rem;color:#1565C0;">🏡 Cook's Bay BnB <span style="display:block;font-size:0.72rem;color:var(--muted);margin-top:0.15rem;">~35 min from Cook's Bay BnB</span></td></tr>
+      <tr data-nearest=""><td style="padding:0.6rem 1rem;" onclick="panToPlaceOnMap('agri')" style="cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px;">🍦 Agricultural College Stand</td><td style="padding:0.6rem 1rem;">Fresh ice cream, jams &amp; local produce · Opunohu Valley road (Lycée agricole)</td><td style="padding:0.6rem 1rem;white-space:nowrap;font-size:0.8rem;color:#1565C0;">🏡 Cook's Bay BnB <span style="display:block;font-size:0.72rem;color:var(--muted);margin-top:0.15rem;">~20 min from Cook's Bay BnB</span></td></tr>
+      <tr data-nearest=""><td style="padding:0.6rem 1rem;" onclick="panToPlaceOnMap('belvedere')" style="cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px;">👁 Belvédère Lookout</td><td style="padding:0.6rem 1rem;">Best view of Cook's Bay &amp; Opunohu Bay · Drive up the mountain road</td><td style="padding:0.6rem 1rem;white-space:nowrap;font-size:0.8rem;color:#1565C0;">🏡 Cook's Bay BnB <span style="display:block;font-size:0.72rem;color:var(--muted);margin-top:0.15rem;">~25 min from Cook's Bay BnB</span></td></tr>
+      <tr data-nearest=""><td style="padding:0.6rem 1rem;" onclick="panToPlaceOnMap('magicmtn')" style="cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px;">⛰ Magic Mountain Hike</td><td style="padding:0.6rem 1rem;">Interior trail with panoramic views · Opunohu / Belvedere area</td><td style="padding:0.6rem 1rem;white-space:nowrap;font-size:0.8rem;color:#6A1B9A;">🌴 Piha'ena BnB <span style="display:block;font-size:0.72rem;color:var(--muted);margin-top:0.15rem;">~15 min from Piha'ena BnB</span></td></tr>
+      <tr><td style="padding:0.6rem 1rem;">🤿 Snorkeling &amp; Diving</td><td style="padding:0.6rem 1rem;">The Aquarium · Sofitel/Temae · Hilton Beach · Topdive crash sites</td><td style="padding:0.6rem 1rem;white-space:nowrap;font-size:0.8rem;color:#00796B;">🌊 Tiahura BnB</td></tr>
+      <tr data-nearest=""><td style="padding:0.6rem 1rem;" onclick="panToPlaceOnMap('tepua')" style="cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px;">🌳 Te Pū 'Ātiti'a</td><td style="padding:0.6rem 1rem;">Fallen sacred tree &amp; cultural heritage site</td><td style="padding:0.6rem 1rem;white-space:nowrap;font-size:0.8rem;color:#6A1B9A;">🌴 Piha'ena BnB <span style="display:block;font-size:0.72rem;color:var(--muted);margin-top:0.15rem;">~10 min from Piha'ena BnB</span></td></tr>
+      <tr data-nearest=""><td style="padding:0.6rem 1rem;" onclick="panToPlaceOnMap('threecocos')" style="cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px;">🥥 Three Coconuts Trail / Three Pines Lookout</td><td style="padding:0.6rem 1rem;">Scenic ridge hike through the Opunohu Valley</td><td style="padding:0.6rem 1rem;white-space:nowrap;font-size:0.8rem;color:#1565C0;">🏡 Cook's Bay BnB <span style="display:block;font-size:0.72rem;color:var(--muted);margin-top:0.15rem;">~25 min from Cook's Bay BnB</span></td></tr>
+      <tr class="tbl-head">
+        <td colspan="4" style="padding:0.55rem 1rem;font-size:0.76rem;text-transform:uppercase;letter-spacing:0.08em;">🏖 Beaches</td>
+      </tr>
+      <tr data-nearest=""><td style="padding:0.6rem 1rem;" onclick="panToPlaceOnMap('taahiatiahura')" style="cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px;">🏖 Tiahura Beach</td><td style="padding:0.6rem 1rem;">Public beach · Northwest coast near Tiahura</td><td style="padding:0.6rem 1rem;white-space:nowrap;font-size:0.8rem;color:#00796B;">🌊 Tiahura BnB <span style="display:block;font-size:0.72rem;color:var(--muted);margin-top:0.15rem;">~5 min from Tiahura BnB</span></td></tr>
+      <tr data-nearest=""><td style="padding:0.6rem 1rem;" onclick="panToPlaceOnMap('taahia')" style="cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px;">🏖 Plage de Ta'ahiamanu</td><td style="padding:0.6rem 1rem;">Beautiful public beach · North coast</td><td style="padding:0.6rem 1rem;white-space:nowrap;font-size:0.8rem;color:#6A1B9A;">🌴 Piha'ena BnB <span style="display:block;font-size:0.72rem;color:var(--muted);margin-top:0.15rem;">~20 min from Piha'ena BnB</span></td></tr>
+      <tr data-nearest=""><td style="padding:0.6rem 1rem;" onclick="panToPlaceOnMap('temae')" style="cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px;">🤿 Tema'e Beach</td><td style="padding:0.6rem 1rem;">Great snorkeling · Northeast coast near the airport</td><td style="padding:0.6rem 1rem;white-space:nowrap;font-size:0.8rem;color:#1565C0;">🏡 Cook's Bay BnB <span style="display:block;font-size:0.72rem;color:var(--muted);margin-top:0.15rem;">~10 min from Cook's Bay BnB</span></td></tr>
+      <tr data-nearest=""><td style="padding:0.6rem 1rem;" onclick="panToPlaceOnMap('tipaniers')" style="cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px;">🤿 Tipaniers Beach</td><td style="padding:0.6rem 1rem;">Great snorkeling right off the beach · Hotel Les Tipaniers area</td><td style="padding:0.6rem 1rem;white-space:nowrap;font-size:0.8rem;color:#00796B;">🌊 Tiahura BnB <span style="display:block;font-size:0.72rem;color:var(--muted);margin-top:0.15rem;">~5 min from Tiahura BnB</span></td></tr>
+      <tr data-nearest=""><td style="padding:0.6rem 1rem;" onclick="panToPlaceOnMap('wedovaa')" style="cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px;">🍍 We DO Va'a Moorea</td><td style="padding:0.6rem 1rem;">Pineapple Beach</td><td style="padding:0.6rem 1rem;white-space:nowrap;font-size:0.8rem;color:#6A1B9A;">🌴 Piha'ena BnB <span style="display:block;font-size:0.72rem;color:var(--muted);margin-top:0.15rem;">~20 min from Piha'ena BnB</span></td></tr>
+      <tr class="tbl-head">
+        <td colspan="4" style="padding:0.55rem 1rem;font-size:0.76rem;text-transform:uppercase;letter-spacing:0.08em;">🍽 Restaurants</td>
+      </tr>
+      <tr data-nearest=""><td style="padding:0.6rem 1rem;" onclick="panToPlaceOnMap('allopizza')" style="cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px;">🍕 Allo Pizza</td><td style="padding:0.6rem 1rem;">Local pizza spot</td><td style="padding:0.6rem 1rem;white-space:nowrap;font-size:0.8rem;color:#1565C0;">🏡 Cook's Bay BnB <span style="display:block;font-size:0.72rem;color:var(--muted);margin-top:0.15rem;">~10 min from Cook's Bay BnB</span></td></tr>
+      <tr data-nearest=""><td style="padding:0.6rem 1rem;" onclick="panToPlaceOnMap('caramelin')" style="cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px;">🍮 Caramel'In Cafe</td><td style="padding:0.6rem 1rem;">Café · Northeast coast</td><td style="padding:0.6rem 1rem;white-space:nowrap;font-size:0.8rem;color:#1565C0;">🏡 Cook's Bay BnB <span style="display:block;font-size:0.72rem;color:var(--muted);margin-top:0.15rem;">~10 min from Cook's Bay BnB</span></td></tr>
+      <tr data-nearest=""><td style="padding:0.6rem 1rem;" onclick="panToPlaceOnMap('cocobeach')" style="cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px;">🏖 Coco Beach</td><td style="padding:0.6rem 1rem;">Beachside restaurant · Hotel Les Tipaniers area</td><td style="padding:0.6rem 1rem;white-space:nowrap;font-size:0.8rem;color:#00796B;">🌊 Tiahura BnB <span style="display:block;font-size:0.72rem;color:var(--muted);margin-top:0.15rem;">~5 min from Tiahura BnB</span></td></tr>
+      <tr data-nearest=""><td style="padding:0.6rem 1rem;" onclick="panToPlaceOnMap('lezard')" style="cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px;">🦎 Le Lézard Jaune Café</td><td style="padding:0.6rem 1rem;">Café &amp; restaurant · Northwest coast</td><td style="padding:0.6rem 1rem;white-space:nowrap;font-size:0.8rem;color:#00796B;">🌊 Tiahura BnB <span style="display:block;font-size:0.72rem;color:var(--muted);margin-top:0.15rem;">~8 min from Tiahura BnB</span></td></tr>
+      <tr data-nearest=""><td style="padding:0.6rem 1rem;" onclick="panToPlaceOnMap('rotui')" style="cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px;">🍊 Rotui Juice Factory</td><td style="padding:0.6rem 1rem;">Manutea Tahiti — tropical juice &amp; distillery · Cook's Bay area</td><td style="padding:0.6rem 1rem;white-space:nowrap;font-size:0.8rem;color:#6A1B9A;">🌴 Piha'ena BnB <span style="display:block;font-size:0.72rem;color:var(--muted);margin-top:0.15rem;">~5 min from Piha'ena BnB</span></td></tr>
+      <tr data-nearest=""><td style="padding:0.6rem 1rem;" onclick="panToPlaceOnMap('roulotte')" style="cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px;">🚚 Roulotte Daddy's Truck Moorea</td><td style="padding:0.6rem 1rem;">Food truck</td><td style="padding:0.6rem 1rem;white-space:nowrap;font-size:0.8rem;color:#1565C0;">🏡 Cook's Bay BnB <span style="display:block;font-size:0.72rem;color:var(--muted);margin-top:0.15rem;">~35 min from Cook's Bay BnB</span></td></tr>
+      <tr data-nearest=""><td style="padding:0.6rem 1rem;" onclick="panToPlaceOnMap('rudys')" style="cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px;">🇫🇷 Rudy's Restaurant</td><td style="padding:0.6rem 1rem;">Known for the French onion soup and parrotfish</td><td style="padding:0.6rem 1rem;white-space:nowrap;font-size:0.8rem;color:#1565C0;">🏡 Cook's Bay BnB <span style="display:block;font-size:0.72rem;color:var(--muted);margin-top:0.15rem;">~12 min from Cook's Bay BnB</span></td></tr>
+      <tr data-nearest=""><td style="padding:0.6rem 1rem;" onclick="panToPlaceOnMap('mahana')" style="cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px;">🍱 Snack Mahana</td><td style="padding:0.6rem 1rem;">Local snack bar / casual dining · Known for their poisson</td><td style="padding:0.6rem 1rem;white-space:nowrap;font-size:0.8rem;color:#6A1B9A;">🌴 Piha'ena BnB <span style="display:block;font-size:0.72rem;color:var(--muted);margin-top:0.15rem;">~10 min from Piha'ena BnB</span></td></tr>
+      <tr data-nearest=""><td style="padding:0.6rem 1rem;" onclick="panToPlaceOnMap('autea')" style="cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px;">🍽 Snack AUTEA</td><td style="padding:0.6rem 1rem;">Known for mahi-mahi and fish samosas</td><td style="padding:0.6rem 1rem;white-space:nowrap;font-size:0.8rem;color:#1565C0;">🏡 Cook's Bay BnB <span style="display:block;font-size:0.72rem;color:var(--muted);margin-top:0.15rem;">~30 min from Cook's Bay BnB</span></td></tr>
+      <tr data-nearest=""><td style="padding:0.6rem 1rem;" onclick="panToPlaceOnMap('motugrill')" style="cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px;">🍖 Motu Grill</td><td style="padding:0.6rem 1rem;">Grill restaurant</td><td style="padding:0.6rem 1rem;white-space:nowrap;font-size:0.8rem;color:#1565C0;">🏡 Cook's Bay BnB <span style="display:block;font-size:0.72rem;color:var(--muted);margin-top:0.15rem;">~10 min from Cook's Bay BnB</span></td></tr>
+      <tr data-nearest=""><td style="padding:0.6rem 1rem;" onclick="panToPlaceOnMap('holysteak')" style="cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px;">🥩 Holy Steak House</td><td style="padding:0.6rem 1rem;">Steak restaurant</td><td style="padding:0.6rem 1rem;white-space:nowrap;font-size:0.8rem;color:#00796B;">🌊 Tiahura BnB <span style="display:block;font-size:0.72rem;color:var(--muted);margin-top:0.15rem;">~8 min from Tiahura BnB</span></td></tr>
+      <tr data-nearest=""><td style="padding:0.6rem 1rem;" onclick="panToPlaceOnMap('rendez')" style="cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px;">🚐 Roulotte Rendez-vous chez nous</td><td style="padding:0.6rem 1rem;">Food truck / roulotte</td><td style="padding:0.6rem 1rem;white-space:nowrap;font-size:0.8rem;color:#1565C0;">🏡 Cook's Bay BnB <span style="display:block;font-size:0.72rem;color:var(--muted);margin-top:0.15rem;">~15 min from Cook's Bay BnB</span></td></tr>
+      <tr data-nearest=""><td style="padding:0.6rem 1rem;" onclick="panToPlaceOnMap('mozcafe')" style="cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px;">☕ Moz Cafe</td><td style="padding:0.6rem 1rem;">Brunch and café · poisson cru</td><td style="padding:0.6rem 1rem;white-space:nowrap;font-size:0.8rem;color:#1565C0;">🏡 Cook's Bay BnB <span style="display:block;font-size:0.72rem;color:var(--muted);margin-top:0.15rem;">~5 min from Cook's Bay BnB</span></td></tr>
+      <tr data-nearest=""><td style="padding:0.6rem 1rem;" onclick="panToPlaceOnMap('apicoffee')" style="cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px;">☕ Api Coffee</td><td style="padding:0.6rem 1rem;">Known for breakfast &amp; coffee</td><td style="padding:0.6rem 1rem;white-space:nowrap;font-size:0.8rem;color:#6A1B9A;">🌴 Piha'ena BnB <span style="display:block;font-size:0.72rem;color:var(--muted);margin-top:0.15rem;">~30 min from Piha'ena BnB</span></td></tr>
+      <tr data-nearest=""><td style="padding:0.6rem 1rem;" onclick="panToPlaceOnMap('carmeline')" style="cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px;">🥐 Carmeline</td><td style="padding:0.6rem 1rem;">Known for coffee &amp; French pastries</td><td style="padding:0.6rem 1rem;white-space:nowrap;font-size:0.8rem;color:#1565C0;">🏡 Cook's Bay BnB <span style="display:block;font-size:0.72rem;color:var(--muted);margin-top:0.15rem;">~5 min from Cook's Bay BnB</span></td></tr>
+      <tr data-nearest=""><td style="padding:0.6rem 1rem;" onclick="panToPlaceOnMap('lemaa')" style="cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px;">🛒 Le Ma'a dans le Bocal</td><td style="padding:0.6rem 1rem;">Grocery &amp; café · cookies</td><td style="padding:0.6rem 1rem;white-space:nowrap;font-size:0.8rem;color:#6A1B9A;">🌴 Piha'ena BnB <span style="display:block;font-size:0.72rem;color:var(--muted);margin-top:0.15rem;">~5 min from Piha'ena BnB</span></td></tr>
+      <tr data-nearest=""><td style="padding:0.6rem 1rem;" onclick="panToPlaceOnMap('teanahei')" style="cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px;">🍢 Snack Teanahei</td><td style="padding:0.6rem 1rem;">Known for skewers and poisson cru</td><td style="padding:0.6rem 1rem;white-space:nowrap;font-size:0.8rem;color:#1565C0;">🏡 Cook's Bay BnB <span style="display:block;font-size:0.72rem;color:var(--muted);margin-top:0.15rem;">~8 min from Cook's Bay BnB</span></td></tr>
+    </table>
+  </div>
+  <div class="sec">Packing Checklists</div>
+  <details class="checklist-wrap card" open>
+    <summary>✈ Before the Trip</summary>
+    <ul>
+      <li><input type="checkbox" id="b1"><label for="b1">Passport / government ID</label></li>
+      <li><input type="checkbox" id="b2"><label for="b2">Driver's license + credit card for Avis pickup</label></li>
+      <li><input type="checkbox" id="bx1"><label for="bx1">Small daypack/backpack for ferry &amp; day trips</label></li>
+      <li><input type="checkbox" id="bx2"><label for="bx2">Withdraw XPF cash at airport ATM on arrival</label></li>
+      <li><input type="checkbox" id="n1"><label for="n1">Travel insurance card + emergency contact numbers</label></li>
+      <li><input type="checkbox" id="n2"><label for="n2">Notify bank / credit cards of French Polynesia travel</label></li>
+      <li><input type="checkbox" id="n3"><label for="n3">XPF cash — some local spots are cash-only</label></li>
+      <li><input type="checkbox" id="n4"><label for="n4">Copies of all booking confirmations (offline)</label></li>
+      <li><input type="checkbox" id="n5"><label for="n5">Type E/F power adapter (French Polynesia uses French outlets)</label></li>
+      <li><input type="checkbox" id="n6"><label for="n6">Portable power bank / battery pack</label></li>
+      <li><input type="checkbox" id="n7"><label for="n7">Waterproof phone case or dry bag</label></li>
+      <li><input type="checkbox" id="n8"><label for="n8">Underwater/action camera or GoPro (helmet dive + jetski)</label></li>
+      <li><input type="checkbox" id="n9"><label for="n9">Download offline maps of Moorea before leaving (Google Maps / Maps.me)</label></li>
+      <li><input type="checkbox" id="b3"><label for="b3">Reef-safe sunscreen</label></li>
+      <li><input type="checkbox" id="n10"><label for="n10">Insect/mosquito repellent (essential in French Polynesia)</label></li>
+      <li><input type="checkbox" id="n11"><label for="n11">Seasickness / motion sickness tablets (ferry + boat tours)</label></li>
+      <li><input type="checkbox" id="n14"><label for="n14">First aid kit: coral cut antiseptic, bandages</label></li>
+      <li><input type="checkbox" id="b4"><label for="b4">Snorkel mask &amp; fins</label></li>
+      <li><input type="checkbox" id="b5"><label for="b5">Closed-toe shoes (plantation tour Sep 24 + ATV Sep 28)</label></li>
+      <li><input type="checkbox" id="n15"><label for="n15">Rash guard / UV sun shirt (long hours on water)</label></li>
+      <li><input type="checkbox" id="n16"><label for="n16">Water shoes / reef shoes (coral reef entry)</label></li>
+      <li><input type="checkbox" id="n17"><label for="n17">Light rain jacket or poncho (tropical showers are common)</label></li>
+      <li><input type="checkbox" id="n18"><label for="n18">Sandals / flip-flops for everyday use</label></li>
+      <li><input type="checkbox" id="c2"><label for="c2">Swimwear + towel</label></li>
+      <li><input type="checkbox" id="c3"><label for="c3">Sunglasses &amp; hat</label></li>
+    </ul>
+  </details>
+  <details class="checklist-wrap card" open>
+    <summary>🌺 During the Trip</summary>
+    <ul>
+      <li><input type="checkbox" id="dx1"><label for="dx1">Use bus #30B (Papeete) or taxi to get to ferry terminal (Papeete side)</label></li>
+      <li><input type="checkbox" id="b6"><label for="b6">Check Sep 23 email from Aroa for meeting time (Sep 24 tour)</label></li>
+      <li><input type="checkbox" id="c4"><label for="c4">Secure bag / no loose valuables for ATV (Sep 28)</label></li>
+      <li><input type="checkbox" id="f1"><label for="f1">Check Aquablue for any waiver/release form before Oct 2</label></li>
+      <li><input type="checkbox" id="f2"><label for="f2">Remove jewelry &amp; watch for scuba dive (Oct 2)</label></li>
+      <li><input type="checkbox" id="f3"><label for="f3">Be at Magasin Tiahura by 8:30 AM on Oct 2</label></li>
+      <li><input type="checkbox" id="f5"><label for="f5">Read Fare Mihi guest guide: easyrentalmoorea.com/faremihinoa</label></li>
+      <li><input type="checkbox" id="n12"><label for="n12">After-sun lotion / aloe vera</label></li>
+      <li><input type="checkbox" id="n13"><label for="n13">Use reef-safe &amp; biodegradable toiletries near the reef</label></li>
+      <li><input type="checkbox" id="n19"><label for="n19">Confirm Moorea → Papeete ferry ticket for Oct 6 evening</label></li>
+    </ul>
+  </details>
+  <details class="checklist-wrap card" open>
+    <summary>🏠 Before Leaving</summary>
+    <ul>
+      <li><input type="checkbox" id="f6"><label for="f6">Unpair phone from Avis car before Oct 6 return</label></li>
+      <li><input type="checkbox" id="n20"><label for="n20">Arrive at Vaiare Ferry Terminal 20 min before departure</label></li>
+      <li><input type="checkbox" id="dx1"><label for="dx1">Use bus #30B (TEAHUPOO) or taxi to get to airport terminal (FAA'A - Aéroport Faa'a)</label></li>
+      <li><input type="checkbox" id="p5"><label for="p5">Currency / convert remaining XPF (CFP Franc)</label></li>
+      <li><input type="checkbox" id="p1"><label for="p1">Check flight departure time at Faa'a Airport (PPT)</label></li>
+      <li><input type="checkbox" id="p4"><label for="p4">Confirm online check-in 24 hrs before Oct 7 flight</label></li>
+      <li><input type="checkbox" id="p2"><label for="p2">Allow 30 min transit from Rue Francois Cardella to airport</label></li>
+    </ul>
+  </details>
+
+  <div class="sec">Quick Reference</div>
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">📋 Booking Numbers</div>
+      <table class="ref-table">
+        <tr><td>Avis Car Rental</td><td><span class="ref">#14503779US3</span></td></tr>
+        <tr><td>ATV Tour</td><td><span class="ref">#352658925</span> / <span class="ref">FSZYGE</span></td></tr>
+        <tr><td>Scuba Dive</td><td><span class="ref">#352661829</span></td></tr>
+        <tr><td>Jetski Tour</td><td><span class="ref">#352650850</span></td></tr>
+        <tr><td>Tiki/Sunset Tour</td><td><span class="ref">BR-1404916719</span></td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title">📞 Key Contacts</div>
+      <table class="ref-table">
+        <tr><td>Avis Moorea</td><td>+689 89 401 075</td></tr>
+        <tr><td>Aquablue (Vincent)</td><td>+689 87 73 24 40</td></tr>
+        <tr><td>Moorea Activities (Virginie)</td><td>+689 87 77 09 71</td></tr>
+        <tr><td>Bay View Host – Tevaite</td><td>via Airbnb</td></tr>
+        <tr><td>Cook Bay Host – Fatiha</td><td>via Airbnb</td></tr>
+        <tr><td>Fare Mihi Host – Adrien</td><td>via Airbnb</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">🌤 Moorea Sep–Oct Typical Weather</div>
+  <div class="card">
+    <div class="weather-grid">
+      <div class="weather-cell"><div style="font-size:1.5rem;">☀️</div><strong>Avg High</strong><br>29°C / 84°F</div>
+      <div class="weather-cell"><div style="font-size:1.5rem;">🌙</div><strong>Avg Low</strong><br>22°C / 72°F</div>
+      <div class="weather-cell"><div style="font-size:1.5rem;">🌊</div><strong>Sea Temp</strong><br>27°C / 81°F</div>
+      <div class="weather-cell"><div style="font-size:1.5rem;">🌧</div><strong>Rain Days</strong><br>~10 days/mo</div>
+      <div class="weather-cell"><div style="font-size:1.5rem;">💧</div><strong>Humidity</strong><br>~78%</div>
+      <div class="weather-cell"><div style="font-size:1.5rem;">🌅</div><strong>Sunrise</strong><br>~5:55 AM</div>
+      <div class="weather-cell"><div style="font-size:1.5rem;">🌇</div><strong>Sunset</strong><br>~6:10 PM</div>
+    </div>
+    <p style="font-size:0.78rem;color:var(--muted);margin-top:0.75rem;">Sep–Oct is the transition from dry to wet season — generally sunny with occasional short showers. Ideal for water activities.</p>
+  </div>
+
+  <div class="sec">⛴ Ferry Schedule — Tahiti ↔ Moorea</div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <table class="ref-table" style="font-size:0.85rem;">
+      <tr class="tbl-head"><td style="padding:0.55rem 1rem;font-weight:700;">Direction</td><td style="padding:0.55rem 1rem;font-weight:700;">Departures</td><td style="padding:0.55rem 1rem;font-weight:700;">Duration</td></tr>
+      <tr><td style="padding:0.55rem 1rem;white-space:nowrap;">🚢 Papeete → Moorea (Vaiare)</td><td style="padding:0.55rem 1rem;">6:00 · 7:00 · 8:00 · 9:15 · 11:30 · 13:30 · 15:00 · 17:30 · 19:00</td><td style="padding:0.55rem 1rem;">~30 min</td></tr>
+      <tr><td style="padding:0.55rem 1rem;white-space:nowrap;">🚢 Moorea (Vaiare) → Papeete</td><td style="padding:0.55rem 1rem;">5:00 · 6:00 · 7:00 · 8:30 · 10:30 · 12:30 · 14:00 · 16:30 · 18:00</td><td style="padding:0.55rem 1rem;">~30 min</td></tr>
+      <tr style="background:#B45309;"><td colspan="3" style="padding:0.5rem 1rem;font-size:0.78rem;color:#fff;font-weight:600;">⚠ Verify at <strong>aremiti.net</strong> or <strong>terevau.com</strong> before travel</td></tr>
+    </table>
+  </div>
+
+  <div class="sec">🚨 Emergency Numbers</div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <table class="ref-table" style="font-size:0.88rem;">
+      <tr><td style="padding:0.6rem 1rem;">🏥 Moorea Medical Center (CHPF Antenne)</td><td style="padding:0.6rem 1rem;">+689 40 56 23 23</td></tr>
+      <tr><td style="padding:0.6rem 1rem;">🏥 Taaone Hospital (Tahiti)</td><td style="padding:0.6rem 1rem;">+689 40 48 62 62</td></tr>
+      <tr><td style="padding:0.6rem 1rem;">🚒 Fire / Rescue (Pompiers)</td><td style="padding:0.6rem 1rem;">18</td></tr>
+      <tr><td style="padding:0.6rem 1rem;">🚔 Police</td><td style="padding:0.6rem 1rem;">17</td></tr>
+      <tr><td style="padding:0.6rem 1rem;">🆘 Emergency (Medical)</td><td style="padding:0.6rem 1rem;">15</td></tr>
+      <tr><td style="padding:0.6rem 1rem;">🇺🇸 US Embassy Papeete</td><td style="padding:0.6rem 1rem;">+689 40 42 69 35 · After hours: +1 (202) 501-4444</td></tr>
+      <tr><td style="padding:0.6rem 1rem;">🚁 CROSS (Sea Rescue)</td><td style="padding:0.6rem 1rem;">+689 40 54 03 63</td></tr>
+      <tr><td style="padding:0.6rem 1rem;">🚕 Airport Taxi (Papeete/PPT)</td><td style="padding:0.6rem 1rem;">+689 40 866 066</td></tr>
+      <tr><td style="padding:0.6rem 1rem;">🐠 Hyperbaric (Dive emergencies)</td><td style="padding:0.6rem 1rem;">+689 40 46 67 00 (Tahiti)</td></tr>
+    </table>
+  </div>
+
+</div>
+
+
+<!-- ═══════════════ STAY 1: BAY VIEW ═══════════════ -->
+<div id="pane-stay1" class="tab-pane" role="region" aria-label="Cook's Bay BnB">
+
+  <div class="stay-banner bay">
+    <div class="s-icon">🏡</div>
+    <h2>The Cook's Bay BnB — Paopao</h2>
+    <div class="s-sub">PK 7.5 côté montagne · Plus Code 53JGG55M+Q6 · Moorea-Maiao 98728 · Hosted by Tevaite · Airbnb</div>
+    <div class="s-dates">Mon Sep 21 (check-in 3:00 PM) → Sat Sep 26 (checkout 11:00 AM) · 5 nights · 2 adults</div>
+    <div style="margin-top:0.6rem;"><a href="https://www.airbnb.com/rooms/1673350956991997777" target="_blank" style="color:rgba(255,255,255,0.85);font-size:0.82rem;text-decoration:underline;">📷 View Photos on Airbnb ↗</a></div>
+  </div>
+
+  <div class="card info-grid">
+    <div class="info-item"><label>Check-in</label><span>Mon Sep 21 · after 3:00 PM</span></div>
+    <div class="info-item"><label>Checkout</label><span>Sat Sep 26 · by 11:00 AM</span></div>
+    <div class="info-item"><label>Address</label><span>PK 7.5, côté montagne</span></div>
+    <div class="info-item"><label>Plus Code</label><span>53JGG55M+Q6</span></div>
+    <div class="info-item"><label>Host</label><span>Tevaite</span></div>
+    <div class="info-item"><label>Guests</label><span>2 adults</span></div>
+    <div class="info-item"><label>Next stay</label><span>Piha'ena BnB · Sep 26 3pm</span></div>
+  </div>
+
+  <div class="sec">Day-by-Day</div>
+
+  <!-- Sep 21 -->
+  <div class="day-card">
+    <div class="day-header">
+      <span class="d-date">Monday, September 21</span>
+      <span><span class="chip flight">Arrive Tahiti</span><span class="chip transport">Car Pickup</span><span class="chip checkin">Check-In</span></span>
+    </div>
+    <div class="day-body"><div class="timeline">
+      <div class="tl-item ev-flight">
+        <div class="tl-time">Early morning · Papeete, Tahiti</div>
+        <div class="tl-title">✈ Arrive Tahiti from SFO (overnight Sep 20 flight)</div>
+        <div class="tl-note">Take ferry from Papeete to Moorea · Ferry is ~30 min</div>
+      </div>
+      <div class="tl-item ev-transport">
+        <div class="tl-time">6:30 AM · Vaiare Ferry Terminal, DK7</div>
+        <div class="tl-title">🚗 Avis Car Pickup — Renault Twingo</div>
+        <div class="tl-note">Reservation <span class="ref">#14503779US3</span> · Unlimited km · +689 89 401 075</div>
+        <div class="tl-note">Hours Mon–Fri 6:30 AM–5:00 PM · Sat–Sun 7:30 AM–4:00 PM</div>
+        <div class="tl-warn">⚑ They meet the ferry — be on a ferry arriving by 6:30 AM</div>
+      </div>
+      <div class="tl-item ev-stay">
+        <div class="tl-time">after 3:00 PM · PK 7.5, côté montagne</div>
+        <div class="tl-title">🏡 Check-In — Cook's Bay BnB</div>
+        <div class="tl-note">Hosted by Tevaite · 2 adults</div>
+        <div class="tl-warn">⚑ Arrive by 2:45 PM to be ready at the door</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- Sep 22 -->
+  <div class="day-card">
+    <div class="day-header">
+      <span class="d-date">Tuesday, September 22</span>
+      <span><span class="chip activity">Tiki/Sunset Tour</span></span>
+    </div>
+    <div class="day-body"><div class="timeline">
+      <div class="tl-item ev-activity">
+        <div class="tl-time">3:45 PM — Arrive early · G56J+9VV, Moorea</div>
+        <div class="tl-title">🚤 Moorea Tiki Tour / Sunset Boat Trip</div>
+        <div class="tl-note">4:00 PM – 6:00 PM · 2 hours · 2 adults · Returns to start</div>
+        <div class="tl-note">Confirmation: <span class="ref">BR-1404916719</span> · Capital One Travel / Viator</div>
+        <div class="tl-note">Tour operator confirms pickup 24 hrs in advance</div>
+        <div class="tl-note">
+          <a class="map-link" href="https://maps.apple.com/?ll=-17.488983,-149.817875&z=16&q=Moorea+Sunset+Boat" target="_blank">📍 Open in Maps</a>
+        </div>
+        <div class="tl-warn">⚑ Arrive by 3:45 PM — check voucher for exact meeting point</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- Sep 23 -->
+  <div class="day-card">
+    <div class="day-header"><span class="d-date">Wednesday, September 23</span><span><span class="chip free">Free Day</span></span></div>
+    <div class="day-body" style="color:var(--muted);font-size:0.88rem;padding:0.4rem 0;">No scheduled activities — explore Cook's Bay, snorkel the reef.</div>
+  </div>
+
+  <!-- Sep 24 — Aroa Plantation -->
+  <div class="day-card">
+    <div class="day-header">
+      <span class="d-date">Thursday, September 24</span>
+      <span><span class="chip activity">Cacao & Coffee Farm Tour</span></span>
+    </div>
+    <div class="day-body"><div class="timeline">
+      <div class="tl-item ev-activity">
+        <div class="tl-time">7:45 AM — Arrive early · Opunohu, Moorea 98728</div>
+        <div class="tl-title">🌿 Cacao & Coffee Farm Tour — Chocolaterie Aroa</div>
+        <div class="tl-note">8:00 AM – 11:45 AM · 3h 45m · 2 Adults · Meet at venue (no pickup)</div>
+        <div class="tl-note">Booking <span class="ref">#352712480</span> · <a href="https://www.chocolateriearoa.com" target="_blank">chocolateriearoa.com</a> · +689 87 71 99 22</div>
+        <div class="tl-note">
+          <a class="book-link" href="https://fareharbor.com/embeds/book/chocolateriearoa/items/610970/availability/1691753339/book/?full-items=yes&back=https://www.chocolateriearoa.com/" target="_blank">📋 View Booking ↗</a>
+          <a class="map-link" href="https://maps.apple.com/?ll=-17.522017,-149.845083&z=16&q=Chocolaterie+Aroa" target="_blank">📍 Open in Maps</a>
+        </div>
+        <div class="tl-warn">⚑ Exact meeting time confirmed by email the day before (by 6 PM Sep 23)</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- Sep 25 -->
+  <div class="day-card">
+    <div class="day-header"><span class="d-date">Friday, September 25</span><span><span class="chip free">Free Day</span></span></div>
+    <div class="day-body" style="color:var(--muted);font-size:0.88rem;padding:0.4rem 0;">No scheduled activities — last full day at Cook's Bay BnB. Pack in the evening.</div>
+  </div>
+
+  <!-- Sep 26 -->
+  <div class="day-card">
+    <div class="day-header">
+      <span class="d-date">Saturday, September 26</span>
+      <span><span class="chip checkout">Checkout</span><span class="chip checkin">Cook Bay Check-In</span></span>
+    </div>
+    <div class="day-body"><div class="timeline">
+      <div class="tl-item ev-warn">
+        <div class="tl-time">by 11:00 AM</div>
+        <div class="tl-title">🔑 Checkout — Cook's Bay BnB</div>
+        <div class="tl-note">~10 min drive to Piha'ena BnB check-in (after 3pm)</div>
+        <div class="tl-warn">⚑ Bags in the Avis car by 10:30 AM</div>
+      </div>
+      <div class="tl-item ev-cook">
+        <div class="tl-time">after 3:00 PM · 53JGG56F+V3, Moorea-Maiao</div>
+        <div class="tl-title">🌴 Check-In — Piha'ena BnB (Fatiha)</div>
+        <div class="tl-note">Same day as Bay View checkout — ~3.5 hrs free between stays</div>
+      </div>
+    </div></div>
+  </div>
+
+</div>
+
+<!-- ═══════════════ STAY 2: COOK BAY BNB ═══════════════ -->
+<div id="pane-stay2" class="tab-pane" role="region" aria-label="Piha'ena BnB">
+
+  <div class="stay-banner cook">
+    <div class="s-icon">🌴</div>
+    <h2>Piha'ena BnB</h2>
+    <div class="s-sub">53JGG56F+V3 Moorea-Maiao · Hosted by Fatiha · Airbnb</div>
+    <div class="s-dates">Sat Sep 26 (check-in 3:00 PM) → Thu Oct 1 (checkout · before 4pm) · 5 nights · 2 adults</div>
+    <div style="margin-top:0.6rem;"><a href="https://www.airbnb.com/rooms/1505816071289864743" target="_blank" style="color:rgba(255,255,255,0.85);font-size:0.82rem;text-decoration:underline;">📷 View Photos on Airbnb ↗</a></div>
+  </div>
+
+  <div class="card info-grid">
+    <div class="info-item"><label>Check-in</label><span>Sat Sep 26 · after 3:00 PM</span></div>
+    <div class="info-item"><label>Checkout</label><span>Thu Oct 1 · before 4:00 PM</span></div>
+    <div class="info-item"><label>Plus Code</label><span>53JGG56F+V3</span></div>
+    <div class="info-item"><label>Host</label><span>Fatiha</span></div>
+    <div class="info-item"><label>Guests</label><span>2 max</span></div>
+    <div class="info-item"><label>Note</label><span>Ext. security cameras on property</span></div>
+  </div>
+
+  <div class="sec">Day-by-Day</div>
+
+  <!-- Sep 26 -->
+  <div class="day-card">
+    <div class="day-header">
+      <span class="d-date">Saturday, September 26</span>
+      <span><span class="chip checkin">Check-In</span></span>
+    </div>
+    <div class="day-body"><div class="timeline">
+      <div class="tl-item ev-cook">
+        <div class="tl-time">after 3:00 PM · 53JGG56F+V3, Moorea-Maiao</div>
+        <div class="tl-title">🌴 Check-In — Piha'ena BnB</div>
+        <div class="tl-note">Hosted by Fatiha · Airbnb</div>
+        <div class="tl-warn">⚑ Checkout from Bay View is 11am — ~4 hrs to fill before check-in</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- Sep 27 -->
+  <div class="day-card">
+    <div class="day-header"><span class="d-date">Sunday, September 27</span><span><span class="chip free">Free Day</span></span></div>
+    <div class="day-body" style="color:var(--muted);font-size:0.88rem;padding:0.4rem 0;">No scheduled activities — explore Moorea's northwest coast and lagoon.</div>
+  </div>
+
+  <!-- Sep 28 — ATV -->
+  <div class="day-card">
+    <div class="day-header">
+      <span class="d-date">Monday, September 28</span>
+      <span><span class="chip activity">Big ATV Tour</span></span>
+    </div>
+    <div class="day-body"><div class="timeline">
+      <div class="tl-item ev-transport">
+        <div class="tl-time">12:45 PM — Pickup on main road near your accommodation</div>
+        <div class="tl-title">🚐 Moorea Activities Center Pickup</div>
+        <div class="tl-note">Virginie confirmed: "pick up at 12.45pm on the main road close to your place"</div>
+        <div class="tl-warn">⚑ Be at the main road by 12:30 PM</div>
+      </div>
+      <div class="tl-item ev-activity">
+        <div class="tl-time">1:00 PM – 4:45 PM · Rte de ceinture × Route Rotui, Moorea-Maiao</div>
+        <div class="tl-title">🏍 Big ATV Tour</div>
+        <div class="tl-note">3h 45m · 1 ATV · Booking <span class="ref">#352658925</span> · Order <span class="ref">FSZYGE</span></div>
+        <div class="tl-note">Moorea Activities Center · +689 87 77 09 71 · Virginie</div>
+        <div class="tl-note">
+          <a class="book-link" href="https://fareharbor.com/embeds/book/mooreaactivitiescenter/items/202221/booking/d7a15845-cb84-448f-9d3a-211f4772ce2d/" target="_blank">📋 View Booking ↗</a>
+          <a class="map-link" href="https://maps.apple.com/?ll=-17.488716,-149.826567&z=16&q=Moorea+Activities+Center" target="_blank">📍 Open in Maps</a>
+        </div>
+        <div class="tl-warn">⚑ Pickup 12:45 PM — be at main road 12:30 PM</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- Sep 29 — Massage -->
+  <div class="day-card">
+    <div class="day-header">
+      <span class="d-date">Tuesday, September 29</span>
+      <span><span class="chip activity">Massage</span></span>
+    </div>
+    <div class="day-body"><div class="timeline">
+      <div class="tl-item ev-activity">
+        <div class="tl-time">10:30 PM · -17.491635, -149.900353</div>
+        <div class="tl-title">💆 MooJanzu Massage</div>
+        <div class="tl-note">+689 89 21 79 30</div>
+        <div class="tl-note"><a class="map-link" href="https://maps.apple.com/?ll=-17.491635,-149.900353&z=16&q=MooJanzu+Massage" target="_blank">📍 Open in Maps</a></div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- Sep 30 — Jetski -->
+  <div class="day-card">
+    <div class="day-header">
+      <span class="d-date">Wednesday, September 30</span>
+      <span><span class="chip activity">Jetski Tour</span></span>
+    </div>
+    <div class="day-body"><div class="timeline">
+      <div class="tl-item ev-transport">
+        <div class="tl-time">12:45 PM — Pickup on main road near your accommodation</div>
+        <div class="tl-title">🚐 Moorea Activities Center Pickup</div>
+        <div class="tl-warn">⚑ Be at the main road by 12:30 PM</div>
+      </div>
+      <div class="tl-item ev-activity">
+        <div class="tl-time">1:00 PM – 4:30 PM · 53JGG56F+V3, Moorea-Maiao</div>
+        <div class="tl-title">🚤 Grand Tour de Jetski</div>
+        <div class="tl-note">3.5 hours · 2 people on jetski · Booking <span class="ref">#352650850</span> · €193</div>
+        <div class="tl-note">Moorea Activities Center · +689 87 77 09 71 · Virginie</div>
+        <div class="tl-note">
+          <a class="book-link" href="https://fareharbor.com/mooreaactivitiescenter/dashboard/?overlay=/contacts/321135006/bookings/004cbe42-322e-4890-bd3d-d648b130ae4b/" target="_blank">📋 View Booking ↗</a>
+          <a class="map-link" href="https://maps.apple.com/?ll=-17.489116,-149.827067&z=16&q=Jetski+Moorea" target="_blank">📍 Open in Maps</a>
+        </div>
+        <div class="tl-warn">⚑ Tiahura BnB check-in is tomorrow Oct 1 at 4pm</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- Oct 1 morning -->
+  <div class="day-card">
+    <div class="day-header">
+      <span class="d-date">Thursday, October 1</span>
+      <span><span class="chip checkout">Checkout</span><span class="chip checkin">Fare Mihi Check-In</span></span>
+    </div>
+    <div class="day-body"><div class="timeline">
+      <div class="tl-item ev-warn">
+        <div class="tl-time">morning · before 4:00 PM</div>
+        <div class="tl-title">🔑 Checkout — Piha'ena BnB</div>
+        <div class="tl-note">~20 min drive to Tiahura BnB check-in (after 4pm)</div>
+        <div class="tl-warn">⚑ Bags in car early — Tiahura BnB check-in is not until 4pm</div>
+      </div>
+      <div class="tl-item ev-fare">
+        <div class="tl-time">after 4:00 PM · 53JGG442+MG, Moorea-Maiao</div>
+        <div class="tl-title">🌊 Check-In — Tiahura BnB (Adrien)</div>
+        <div class="tl-note">Watch check-in video: <a href="https://youtu.be/kn39pRVxH5g" target="_blank">youtu.be/kn39pRVxH5g</a> · <a href="https://easyrentalmoorea.com/faremihinoa" target="_blank">Guest guide</a></div>
+      </div>
+    </div></div>
+  </div>
+
+</div>
+
+
+<!-- ═══════════════ STAY 3: FARE MIHI NOA ═══════════════ -->
+<div id="pane-stay3" class="tab-pane" role="region" aria-label="Tiahura BnB">
+
+  <div class="stay-banner fare">
+    <div class="s-icon">🌊</div>
+    <h2>Free Kayaks + King Bed — Tiahura BnB</h2>
+    <div class="s-sub">Tiahura, Moorea-Maiao · Hosted by Adrien (Moorea BnB) · Airbnb</div>
+    <div class="s-dates">Thu Oct 1 (check-in 4:00 PM) → Tue Oct 6 (checkout 10:00 AM) · 5 nights · 2 adults</div>
+    <div style="margin-top:0.6rem;"><a href="https://www.airbnb.com/rooms/701516004451946952" target="_blank" style="color:rgba(255,255,255,0.85);font-size:0.82rem;text-decoration:underline;">📷 View Photos on Airbnb ↗</a></div>
+  </div>
+
+  <div class="card info-grid">
+    <div class="info-item"><label>Check-in</label><span>Thu Oct 1 · after 4:00 PM</span></div>
+    <div class="info-item"><label>Checkout</label><span>Tue Oct 6 · by 10:00 AM</span></div>
+    <div class="info-item"><label>Plus Code</label><span>53JGG442+MG</span></div>
+    <div class="info-item"><label>Host</label><span>Adrien (Moorea BnB)</span></div>
+    <div class="info-item"><label>Perks</label><span>Free kayaks included</span></div>
+    <div class="info-item"><label>GPS</label><span><a href="https://maps.app.goo.gl/2eyJ3NpyMBGFNPWMA" target="_blank">Google Maps ↗</a></span></div>
+  </div>
+
+  <div class="card host-note" style="background:#E8F5E9;font-size:0.88rem;border:1px solid #A5D6A7;">
+    <strong>From Adrien:</strong> &nbsp;
+    <a href="https://youtu.be/kn39pRVxH5g" target="_blank">Check-in video ↗</a> &nbsp;·&nbsp;
+    <a href="https://easyrentalmoorea.com/faremihinoa" target="_blank">Guest guide ↗</a>
+  </div>
+
+  <div class="sec">Day-by-Day</div>
+
+  <!-- Oct 1 -->
+  <div class="day-card">
+    <div class="day-header">
+      <span class="d-date">Thursday, October 1</span>
+      <span><span class="chip checkin">Check-In</span></span>
+    </div>
+    <div class="day-body"><div class="timeline">
+      <div class="tl-item ev-fare">
+        <div class="tl-time">after 4:00 PM · 53JGG442+MG, Tiahura</div>
+        <div class="tl-title">🌊 Check-In — Tiahura BnB</div>
+        <div class="tl-note">Free kayaks available · Hosted by Adrien</div>
+        <div class="tl-warn">⚑ Watch check-in video before arriving</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- Oct 2 — Scuba Dive -->
+  <div class="day-card">
+    <div class="day-header">
+      <span class="d-date">Friday, October 2</span>
+      <span><span class="chip transport">Bus 8:45am</span><span class="chip activity">Scuba Dive 1:30pm</span></span>
+    </div>
+    <div class="day-body"><div class="timeline">
+      <div class="tl-item ev-transport">
+        <div class="tl-time">8:30 AM — Be here early · Magasin Tiahura</div>
+        <div class="tl-title">🚌 Aquablue Bus Pickup at Magasin Tiahura</div>
+        <div class="tl-note">Bus departs 8:45 AM sharp · Confirmed by Vincent (Aquablue)</div>
+        <div class="tl-warn">⚑ Be at Magasin Tiahura by 8:30 AM — ~5 min from Tiahura BnB</div>
+      </div>
+      <div class="tl-item ev-activity">
+        <div class="tl-time">1:30 PM – 4:00 PM · G442+JG, Moorea</div>
+        <div class="tl-title">🤿 Aquablue Scuba Dive (Helmet Dive)</div>
+        <div class="tl-note">2 people · Booking <span class="ref">#352661829</span></div>
+        <div class="tl-note"><a href="http://aquabluemoorea.com" target="_blank">aquabluemoorea.com</a> · +689 87 73 24 40 · Vincent LELONG</div>
+        <div class="tl-note">
+          <a class="book-link" href="https://fareharbor.com/embeds/book/aquabluemoorea/items/187899/booking/ac202294-b7ae-430b-a31c-bf25dd6686b8/" target="_blank">📋 View Booking ↗</a>
+          <a class="map-link" href="https://maps.apple.com/?ll=-17.493806,-149.899379&z=16&q=Aquablue+Moorea" target="_blank">📍 Open in Maps</a>
+        </div>
+        <div class="tl-warn">⚑ Morning bus at 8:45 AM is your transport — don't miss it!</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- Oct 3 — Coco Beach Lunch + TipNautic -->
+  <div class="day-card">
+    <div class="day-header">
+      <span class="d-date">Saturday, October 3</span>
+      <span><span class="chip activity">Lunch Reservation</span><span class="chip activity">Boat Rental</span></span>
+    </div>
+    <div class="day-body"><div class="timeline">
+      <div class="tl-item ev-activity">
+        <div class="tl-time">11:45 AM — Arrive early · Coco Beach, Moorea-Maiao</div>
+        <div class="tl-title">🍽 Coco Beach — Lunch Reservation</div>
+        <div class="tl-note">Table for 2 · Saturday October 3 at 12:00 PM</div>
+        <div class="tl-note">
+          <a class="map-link" href="https://maps.apple.com/?ll=-17.488791,-149.910611&z=16&q=Coco+Beach+Moorea" target="_blank">📍 Open in Maps</a>
+        </div>
+      </div>
+      <div class="tl-item ev-transport">
+        <div class="tl-time">10:00 AM — Be there by 10:15 AM · TipNautic, Tiahura</div>
+        <div class="tl-title">⛵ TipNautic Boat Rental</div>
+        <div class="tl-note">Pickup at 10:15 AM · 16,000 XPF (~$154)</div>
+        <div class="tl-note">
+          <a class="map-link" href="https://maps.apple.com/?ll=-17.490668,-149.905183&z=16&q=TipNautic+Moorea" target="_blank">📍 Open in Maps</a>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- Oct 4-5 -->
+  <div class="day-card">
+    <div class="day-header"><span class="d-date">Sun Oct 4 – Mon Oct 5</span><span><span class="chip free">Free Days</span></span></div>
+    <div class="day-body" style="color:var(--muted);font-size:0.88rem;padding:0.4rem 0;">
+      No scheduled activities — kayaks available at the property! Last full day Mon Oct 5 — pack in the evening.
+    </div>
+  </div>
+
+  <!-- Oct 6 -->
+  <div class="day-card">
+    <div class="day-header">
+      <span class="d-date">Tuesday, October 6</span>
+      <span><span class="chip checkout">Checkout</span><span class="chip transport">Avis Return</span></span>
+    </div>
+    <div class="day-body"><div class="timeline">
+      <div class="tl-item ev-warn">
+        <div class="tl-time">by 10:00 AM</div>
+        <div class="tl-title">🔑 Checkout — Tiahura BnB</div>
+        <div class="tl-note">~30 min drive to Vaiare → 30 min ferry to Papeete → check-in studio</div>
+        <div class="tl-warn">⚑ Bags in the Avis car by 9:30 AM</div>
+      </div>
+      <div class="tl-item ev-transport">
+        <div class="tl-time">5:00 PM · Vaiare Ferry Terminal, DK7</div>
+        <div class="tl-title">🚗 Avis Car Return</div>
+        <div class="tl-note">Reservation <span class="ref">#14503779US3</span> · Meets ferry · +689 89 401 075</div>
+        <div class="tl-warn">⚑ Unpair phone from car before returning</div>
+      </div>
+      <div class="tl-item ev-flight">
+        <div class="tl-time">evening/night · Papeete, Tahiti</div>
+        <div class="tl-title">✈ Ferry back to Tahiti — Check in Papeete Studio, Flight Oct 7 Tahiti→SFO</div>
+        <div class="tl-note">Return flight departs October 7 (arrives SFO next day)</div>
+      </div>
+    </div></div>
+  </div>
+
+</div>
+
+
+<!-- ═══════════════ STAY 4: PAPEETE STUDIO ═══════════════ -->
+<div id="pane-stay4" class="tab-pane" role="region" aria-label="Papeete Studio">
+
+  <div class="stay-banner" style="background:linear-gradient(135deg,#4E342E,#A1887F);">
+    <div class="s-icon">🏙</div>
+    <h2>Papeete Matete Studio Apartment</h2>
+    <div class="s-sub">49 Rue Francois Cardella · Papeete, Tahiti 98714 · Airbnb</div>
+    <div class="s-dates">Tue Oct 6 (check-in after ferry from Moorea) → Wed Oct 7 (checkout before flight) · 1 night</div>
+  </div>
+
+  <div class="card info-grid">
+    <div class="info-item"><label>Check-in</label><span>Tue Oct 6 · evening</span></div>
+    <div class="info-item"><label>Checkout</label><span>Wed Oct 7 · before flight</span></div>
+    <div class="info-item"><label>Address</label><span>49 Rue Francois Cardella</span></div>
+    <div class="info-item"><label>City</label><span>Papeete, Tahiti 98714</span></div>
+    <div class="info-item"><label>Listing</label><span><a href="https://www.airbnb.com/rooms/1557802627884071086" target="_blank">Airbnb ↗</a></span></div>
+  </div>
+
+  <div class="sec">Day-by-Day</div>
+
+  <div class="day-card">
+    <div class="day-header">
+      <span class="d-date">Tuesday, October 6</span>
+      <span><span class="chip checkin">Check-In</span><span class="chip transport">Ferry from Moorea</span></span>
+    </div>
+    <div class="day-body"><div class="timeline">
+      <div class="tl-item ev-warn">
+        <div class="tl-time">by 10:00 AM</div>
+        <div class="tl-title">🔑 Checkout — Tiahura BnB</div>
+        <div class="tl-warn">⚑ Bags in car by 9:30 AM</div>
+      </div>
+      <div class="tl-item ev-transport">
+        <div class="tl-time">5:00 PM · Vaiare Ferry Terminal</div>
+        <div class="tl-title">🚗 Avis Car Return → take ferry to Papeete</div>
+        <div class="tl-note">Reservation <span class="ref">#14503779US3</span> · Ferry ~30 min</div>
+      </div>
+      <div class="tl-item tl-papeete" style="border-color:#5D4037;background:#FBE9E7;">
+        <div class="tl-time">evening · 49 Rue Francois Cardella</div>
+        <div class="tl-title">🏙 Check-In — Papeete Matete Studio</div>
+        <div class="tl-note">Papeete, Tahiti 98714</div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="day-card">
+    <div class="day-header">
+      <span class="d-date">Wednesday, October 7</span>
+      <span><span class="chip checkout">Checkout</span><span class="chip flight">Flight Home</span></span>
+    </div>
+    <div class="day-body"><div class="timeline">
+      <div class="tl-item ev-warn">
+        <div class="tl-time">morning · before flight</div>
+        <div class="tl-title">🔑 Checkout — Papeete Studio</div>
+        <div class="tl-warn">⚑ Allow transit time to Tahiti Faa'a Airport (PPT)</div>
+      </div>
+      <div class="tl-item ev-flight">
+        <div class="tl-time">Oct 7 · Tahiti Faa'a Airport (PPT)</div>
+        <div class="tl-title">✈ Tahiti → San Francisco (SFO)</div>
+        <div class="tl-note">Arrives SFO the next day · Capital One Travel booking</div>
+      </div>
+    </div></div>
+  </div>
+
+</div>
+
+
+<!-- ═══════════════ BUDGET & CURRENCY ═══════════════ -->
+<div id="pane-budget" class="tab-pane" role="region" aria-label="Budget and Currency">
+
+  <div class="sec">💰 Trip Budget Summary</div>
+  <div class="card" style="margin-top:0.5rem;">
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:0.75rem;font-size:0.85rem;text-align:center;">
+      <div class="weather-cell"><div style="font-size:1.2rem;">💰</div><strong>Total Budget</strong><br><span id="budget-total-widget">—</span></div>
+      <div class="weather-cell"><div style="font-size:1.2rem;">📅</div><strong>Per Day</strong><br>$611.32</div>
+      <div class="weather-cell"><div style="font-size:1.2rem;">👥</div><strong>Per Person/Day</strong><br>$305.66</div>
+      <div class="weather-cell"><div style="font-size:1.2rem;">🛏</div><strong>Accommodation</strong><br>$5,124.72 (52%)</div>
+      <div class="weather-cell"><div style="font-size:1.2rem;">🎯</div><strong>Activities</strong><br>$1,525.41 (16%)</div>
+      <div class="weather-cell"><div style="font-size:1.2rem;">🍽</div><strong>Food est.</strong><br>$2,000 (20%)</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Confirmed Bookings</div>
+    <table class="ref-table" style="font-size:0.88rem;">
+      <tr class="tbl-head"><td style="padding:0.5rem;font-weight:700;cursor:pointer;user-select:none;" onclick="sortBudget(0)">Item<span class="bsort-arrow"></span></td><td style="padding:0.5rem;font-weight:700;cursor:pointer;user-select:none;" onclick="sortBudget(1)">Amount<span class="bsort-arrow"></span></td><td style="padding:0.5rem;font-weight:700;">Notes</td></tr>
+      <tr><td style="padding:0.5rem;">✈ Flights (SFO↔PPT)</td><td style="padding:0.5rem;font-weight:600;"><span class="budget-amt" contenteditable="true" data-usd="1820" oninput="recalcBudget()">$1,820</span><span class="xpf-val">189,280 XPF</span></td><td style="padding:0.5rem;">USD ($405 base + $50 seats × 2 passengers × 2 ways)</td></tr>
+      <tr><td style="padding:0.5rem;">🏡 Cook's Bay BnB (5 nights)</td><td style="padding:0.5rem;font-weight:600;"><span class="budget-amt" contenteditable="true" data-usd="1424.08" oninput="recalcBudget()">$1,424.08</span><span class="xpf-val">148,104 XPF</span></td><td style="padding:0.5rem;">USD</td></tr>
+      <tr><td style="padding:0.5rem;">🌴 Piha'ena BnB (5 nights)</td><td style="padding:0.5rem;font-weight:600;"><span class="budget-amt" contenteditable="true" data-usd="917.83" oninput="recalcBudget()">$917.83</span><span class="xpf-val">95,454 XPF</span></td><td style="padding:0.5rem;">USD</td></tr>
+      <tr><td style="padding:0.5rem;">🌊 Tiahura BnB (5 nights)</td><td style="padding:0.5rem;font-weight:600;"><span class="budget-amt" contenteditable="true" data-usd="1629.76" oninput="recalcBudget()">$1,629.76</span><span class="xpf-val">169,495 XPF</span></td><td style="padding:0.5rem;">USD</td></tr>
+      <tr><td style="padding:0.5rem;">🏙 Papeete Studio (1 night)</td><td style="padding:0.5rem;font-weight:600;"><span class="budget-amt" contenteditable="true" data-usd="150.88" oninput="recalcBudget()">$150.88</span><span class="xpf-val">15,692 XPF</span></td><td style="padding:0.5rem;">USD</td></tr>
+      <tr><td style="padding:0.5rem;">🚗 Avis Car Rental (16 days)</td><td style="padding:0.5rem;font-weight:600;"><span class="budget-amt" contenteditable="true" data-usd="1108.18" oninput="recalcBudget()">$1,108.18</span><span class="xpf-val">115,251 XPF</span></td><td style="padding:0.5rem;">USD (115,251 XPF ÷ 104)</td></tr>
+      <tr><td style="padding:0.5rem;">💆 MooJanzu Massage</td><td style="padding:0.5rem;font-weight:600;"><span class="budget-amt" contenteditable="true" data-usd="220" oninput="recalcBudget()">$220.00</span><span class="xpf-val">22,880 XPF</span></td><td style="padding:0.5rem;">USD ($110/person × 2)</td></tr>
+      <tr><td style="padding:0.5rem;">🤿 Aquablue Scuba Dive</td><td style="padding:0.5rem;font-weight:600;"><span class="budget-amt" contenteditable="true" data-usd="207" oninput="recalcBudget()">€186.04 (~$207)</span></td><td style="padding:0.5rem;">EUR</td></tr>
+      <tr><td style="padding:0.5rem;">🏍 Big ATV Tour + 🚤 Jetski Tour</td><td style="padding:0.5rem;font-weight:600;"><span class="budget-amt" contenteditable="true" data-usd="365" oninput="recalcBudget()">$365.00</span><span class="xpf-val">37,960 XPF</span></td><td style="padding:0.5rem;">USD (combined)</td></tr>
+      <tr><td style="padding:0.5rem;">🌿 Aroa Coco Plantation Tour</td><td style="padding:0.5rem;font-weight:600;"><span class="budget-amt" contenteditable="true" data-usd="120" oninput="recalcBudget()">$120.00</span><span class="xpf-val">12,480 XPF</span></td><td style="padding:0.5rem;">USD ($60/person × 2)</td></tr>
+      <tr><td style="padding:0.5rem;">🚤 Tiki / Sunset Boat Tour</td><td style="padding:0.5rem;font-weight:600;"><span class="budget-amt" contenteditable="true" data-usd="218.34" oninput="recalcBudget()">$218.34</span><span class="xpf-val">22,707 XPF</span></td><td style="padding:0.5rem;">USD</td></tr>
+      <tr><td style="padding:0.5rem;">🍽 Food &amp; Dining (est.)</td><td style="padding:0.5rem;font-weight:600;"><span class="budget-amt" id="food-total-amt" data-usd="2000">$2,000.00</span><span class="xpf-val">208,000 XPF</span></td><td style="padding:0.5rem;"><span style="display:inline-flex;gap:0.3rem;align-items:center;flex-wrap:wrap;font-size:0.8rem;">$<input id="food-rate" type="number" value="62.50" min="0" step="5" oninput="calcFoodEst()" style="width:60px;padding:0.15rem 0.3rem;border:1px solid #ccc;border-radius:4px;">/person/day &times; <input id="food-people" type="number" value="2" min="1" step="1" oninput="calcFoodEst()" style="width:40px;padding:0.15rem 0.3rem;border:1px solid #ccc;border-radius:4px;"> people &times; <input id="food-days" type="number" value="16" min="1" step="1" oninput="calcFoodEst()" style="width:44px;padding:0.15rem 0.3rem;border:1px solid #ccc;border-radius:4px;"> days</span></td></tr>
+      <tr><td style="padding:0.5rem;">⛵ TipNautic Boat Rental</td><td style="padding:0.5rem;font-weight:600;"><span class="budget-amt" contenteditable="true" data-usd="153.85" oninput="recalcBudget()">$153.85</span><span class="xpf-val">16,000 XPF</span></td><td style="padding:0.5rem;">XPF (16,000 ÷ 104)</td></tr>
+      <tr class="tbl-total">
+        <td style="padding:0.6rem 0.5rem;font-weight:700;">Confirmed Total</td>
+        <td style="padding:0.6rem 0.5rem;font-weight:400;color:#5C93C8;" id="budget-total">$9,781.07</td>
+        <td style="padding:0.6rem 0.5rem;font-size:0.78rem;color:var(--muted);">+ remaining expenses (food, gas/tolls, etc.)</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="sec">💱 Currency Converter (USD ↔ XPF)</div>
+  <div class="card">
+    <p style="font-size:0.82rem;color:var(--muted);margin-bottom:0.85rem;">XPF (CFP Franc) is pegged to the Euro: <strong>1 EUR = 119.33 XPF</strong>. Rate shown is approximate — check your bank before travel.</p>
+    <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap;">
+      <div style="flex:1;min-width:120px;">
+        <label style="font-size:0.75rem;color:var(--muted);display:block;margin-bottom:0.3rem;">USD</label>
+        <input id="usd-in" type="text" inputmode="decimal" placeholder="0" oninput="convertCurrency('usd')"
+          style="width:100%;padding:0.5rem;border:1.5px solid #ddd;border-radius:8px;font-size:1rem;">
+      </div>
+      <div style="font-size:1.3rem;color:var(--muted);padding-top:1rem;">⇄</div>
+      <div style="flex:1;min-width:120px;">
+        <label style="font-size:0.75rem;color:var(--muted);display:block;margin-bottom:0.3rem;">XPF (CFP Franc)</label>
+        <input id="xpf-in" type="text" inputmode="decimal" placeholder="0" oninput="convertCurrency('xpf')"
+          style="width:100%;padding:0.5rem;border:1.5px solid #ddd;border-radius:8px;font-size:1rem;">
+      </div>
+      <div style="flex:1;min-width:120px;">
+        <label style="font-size:0.75rem;color:var(--muted);display:block;margin-bottom:0.3rem;">EUR</label>
+        <input id="eur-in" type="text" inputmode="decimal" placeholder="0" oninput="convertCurrency('eur')"
+          style="width:100%;padding:0.5rem;border:1.5px solid #ddd;border-radius:8px;font-size:1rem;">
+      </div>
+    </div>
+    <p style="font-size:0.75rem;color:var(--muted);margin-top:0.6rem;">Approximate rates: 1 USD ≈ 104 XPF &nbsp;·&nbsp; 1 EUR ≈ 119 XPF &nbsp;·&nbsp; 1 USD ≈ 0.89 EUR</p>
+  </div>
+
+
+</div>
+
+
+<script>
+  // ── OFFLINE DETECTION + BACKGROUND SYNC ──────────────────────
+  (function() {
+    var banner = document.getElementById('offline-banner');
+    function showOffline() { if (banner) banner.style.display = 'block'; }
+    function showOnline()  {
+      if (banner) banner.style.display = 'none';
+      // Background sync: refresh weather radar when back online
+      if (typeof weatherLayer !== 'undefined' && weatherLayer) {
+        fetch('https://api.rainviewer.com/public/weather-maps.json')
+          .then(function(r){ return r.json(); })
+          .then(function(data){
+            var frames = data.radar && data.radar.past;
+            if (frames && frames.length > 0)
+              weatherLayer.setUrl('https://tilecache.rainviewer.com' + frames[frames.length-1].path + '/256/{z}/{x}/{y}/2/1_1.png');
+          }).catch(function(){});
+      }
+    }
+    if (!navigator.onLine) showOffline();
+    window.addEventListener('online',  showOnline);
+    window.addEventListener('offline', showOffline);
+  })();
+
+  // ── GLOBAL ERROR GUARD ────────────────────────────────────────
+  window.addEventListener('error', function(e) {
+    // Ignore cross-origin noise (Leaflet CDN, tile servers) — always "Script error." at line 0
+    if (!e.message || e.message === 'Script error.' || e.lineno === 0) return;
+    console.error('JS Error:', e.message, 'at', e.filename, e.lineno);
+    var warn = document.getElementById('js-error-banner');
+    if (!warn) {
+      warn = document.createElement('div');
+      warn.id = 'js-error-banner';
+      warn.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#E53935;color:#fff;padding:0.5rem 1rem;font-size:0.8rem;font-weight:700;z-index:9999;text-align:center;';
+      document.body.appendChild(warn);
+    }
+    warn.textContent = '⚠ JS error: ' + e.message + ' (line ' + e.lineno + ') — map/features may not work';
+  });
+
+  // ── MUST GO-TO TABLE FILTER ──────────────────────────────────
+  // Maps stay filter key → nearest-stay color used in table cells
+  var stayColors = { bay: '#1565C0', cook: '#6A1B9A', fare: '#00796B', pap: '#37474F' };
+
+  function filterMustGoToTable(cat) {
+    // Get all data rows (have a colored nearest-stay td)
+    var rows = document.querySelectorAll('#pane-overview .ref-table tr');
+    rows.forEach(function(row) {
+      // Skip header/section rows (no onclick on first td)
+      if (!row.querySelector('td[onclick]')) {
+        row.classList.remove('must-row-dim', 'must-row-near', 'must-row-match');
+        return;
+      }
+      if (!cat) {
+        row.classList.remove('must-row-dim', 'must-row-near', 'must-row-match');
+        return;
+      }
+      // Find the nearest-stay color in the row's last td
+      var lastTd = row.querySelector('td:last-child');
+      var rowColor = lastTd ? (lastTd.getAttribute('style') || '').match(/#[0-9A-Fa-f]{6}/) : null;
+      rowColor = rowColor ? rowColor[0].toLowerCase() : null;
+      var targetColor = (stayColors[cat] || '').toLowerCase();
+      if (!targetColor) {
+        // Non-stay filter — show all rows
+        row.classList.remove('must-row-dim', 'must-row-near', 'must-row-match');
+      } else if (rowColor === targetColor) {
+        row.classList.remove('must-row-dim', 'must-row-near');
+        row.classList.add('must-row-match');
+      } else {
+        // Check if it's a nearby stay (within 15km road)
+        var nearbyStays = Object.keys(stayCentres).filter(function(k) {
+          return k !== cat && stayColors[k] && stayColors[k].toLowerCase() === rowColor &&
+                 kmBetween(stayCentres[cat][0], stayCentres[cat][1], stayCentres[k][0], stayCentres[k][1]) * 1.3 <= 15;
+        });
+        if (nearbyStays.length > 0) {
+          row.classList.remove('must-row-dim');
+          row.classList.add('must-row-near');
+        } else {
+          row.classList.remove('must-row-near');
+          row.classList.add('must-row-dim');
+        }
+      }
+    });
+  }
+
+  // ── WEATHER PANEL + LIVE CONDITIONS (Open-Meteo, no API key) ────
+  var wttrLoaded = false;
+  function loadLiveWeather() {
+    if (wttrLoaded) return;
+    wttrLoaded = true;
+    // Open-Meteo free API — covers French Polynesia
+    var url = 'https://api.open-meteo.com/v1/forecast?latitude=-17.5&longitude=-149.85&current=temperature_2m,relative_humidity_2m,wind_speed_10m,wind_direction_10m,weather_code,precipitation&hourly=precipitation_probability&wind_speed_unit=kmh&timezone=Pacific%2FTahiti&forecast_hours=1';
+    fetch(url)
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        var cur = d.current;
+        var wmoDesc = {0:'Clear sky',1:'Mainly clear',2:'Partly cloudy',3:'Overcast',45:'Foggy',48:'Icy fog',51:'Light drizzle',53:'Drizzle',55:'Heavy drizzle',61:'Light rain',63:'Rain',65:'Heavy rain',71:'Light snow',73:'Snow',75:'Heavy snow',80:'Showers',81:'Showers',82:'Heavy showers',95:'Thunderstorm',96:'Thunderstorm+hail',99:'Thunderstorm+hail'};
+        var desc = wmoDesc[cur.weather_code] || 'code '+cur.weather_code;
+        var windDir = ['N','NE','E','SE','S','SW','W','NW'][Math.round(cur.wind_direction_10m/45)%8];
+        var precipChance = d.hourly && d.hourly.precipitation_probability ? d.hourly.precipitation_probability[0] : null;
+        var txt = desc + ' · ' + cur.temperature_2m + '°C';
+        var det = '💧 ' + cur.relative_humidity_2m + '% humidity · 💨 ' + cur.wind_speed_10m + ' km/h ' + windDir + ' · 🌧 ' + cur.precipitation + 'mm';
+        if (precipChance !== null) det += ' (' + precipChance + '% precip chance)';
+        var el = document.getElementById('wx-live-text');
+        var dl = document.getElementById('wx-live-detail');
+        if (el) el.textContent = txt;
+        if (dl) dl.textContent = det;
+        // Also update map weather control if it exists
+        var mwel = document.getElementById('map-wx-text');
+        var precipStr = cur.precipitation > 0 ? ' · 🌧' + cur.precipitation + 'mm' : '';
+        var chanceStr = precipChance !== null ? ' · 💧' + precipChance + '%' : '';
+        if (mwel) {
+          mwel.style.display = 'flex';
+          mwel.style.justifyContent = 'space-between';
+          mwel.style.alignItems = 'center';
+          mwel.style.gap = '8px';
+          mwel.innerHTML =
+            '<span><strong>' + desc + '</strong> ' + cur.temperature_2m + '°C · 💨' + cur.wind_speed_10m + 'km/h' + chanceStr + '</span>' +
+            (precipStr ? '<span style="opacity:0.9;">' + precipStr + '</span>' : '');
+        }
+      })
+      .catch(function(){
+        var el = document.getElementById('wx-live-text');
+        if (el) el.innerHTML = 'Live data unavailable — <a href="https://www.meteo.pf" target="_blank" style="color:#90CAF9;">meteo.pf ↗</a>';
+      });
+  }
+
+  function toggleWeatherPanel() {
+    var meteoOn = document.getElementById('wx-meteo').checked;
+    var windyOn = document.getElementById('wx-windy').checked;
+    document.getElementById('panel-meteo').style.display = meteoOn ? 'block' : 'none';
+    document.getElementById('panel-windy').style.display = windyOn ? 'block' : 'none';
+    if (meteoOn) loadLiveWeather();
+  }
+  // Auto-load on page ready
+  window.addEventListener('load', function() {
+    setTimeout(function(){
+      if (document.getElementById('wx-meteo') && document.getElementById('wx-meteo').checked) loadLiveWeather();
+    }, 2000);
+  });
+
+  // ── AUTO EXCHANGE RATES ──────────────────────────────────────
+  function fetchExchangeRates() {
+    fetch('https://open.er-api.com/v6/latest/USD')
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if (!d.rates) return;
+        var xpf = d.rates.XPF || d.rates.CFP;
+        var eur = d.rates.EUR;
+        if (xpf) RATES.usd_xpf = Math.round(xpf * 10) / 10;
+        if (eur)  RATES.usd_eur = Math.round(eur * 1000) / 1000;
+        if (xpf && eur) RATES.eur_xpf = Math.round((xpf / eur) * 100) / 100;
+        var rateEl = document.querySelector("#pane-budget p");
+        if (rateEl && rateEl.textContent.includes("XPF"))
+          rateEl.textContent = "Live rates (auto-updated): 1 USD \u2248 " + RATES.usd_xpf + " XPF \u00b7 1 EUR \u2248 " + RATES.eur_xpf + " XPF \u00b7 1 USD \u2248 " + RATES.usd_eur + " EUR";
+        recalcBudget();
+      }).catch(function(){});
+  }
+
+  // ── BUDGET RUNNING TOTAL ─────────────────────────────────────
+  function calcFoodEst() {
+    var rate = parseFloat(document.getElementById('food-rate').value) || 0;
+    var people = parseFloat(document.getElementById('food-people').value) || 0;
+    var days = parseFloat(document.getElementById('food-days').value) || 0;
+    var total = rate * people * days;
+    var el = document.getElementById('food-total-amt');
+    if (el) { el.dataset.usd = total; el.textContent = '$' + total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+    recalcBudget();
+  }
+  function saveBudgetToStorage() {
+    var data = {};
+    document.querySelectorAll('.budget-amt[contenteditable]').forEach(function(el, i) {
+      data['ba-'+i] = {text: el.textContent, usd: el.dataset.usd};
+    });
+    var fi=document.getElementById('food-rate'), fp=document.getElementById('food-people'), fd=document.getElementById('food-days');
+    if (fi) data.foodRate=fi.value; if (fp) data.foodPeople=fp.value; if (fd) data.foodDays=fd.value;
+    try { localStorage.setItem('moorea-budget', JSON.stringify(data)); } catch(e) {}
+  }
+  function restoreBudgetFromStorage() {
+    var raw; try { raw=localStorage.getItem('moorea-budget'); } catch(e) {}
+    if (!raw) return;
+    try {
+      var data = JSON.parse(raw);
+      document.querySelectorAll('.budget-amt[contenteditable]').forEach(function(el, i) {
+        var d=data['ba-'+i]; if (!d) return;
+        el.textContent=d.text; el.dataset.usd=d.usd;
+      });
+      var fi=document.getElementById('food-rate'), fp=document.getElementById('food-people'), fd=document.getElementById('food-days');
+      if (fi&&data.foodRate) fi.value=data.foodRate;
+      if (fp&&data.foodPeople) fp.value=data.foodPeople;
+      if (fd&&data.foodDays) fd.value=data.foodDays;
+    } catch(e) {}
+  }
+  function recalcBudget() {
+    var total = 0;
+    document.querySelectorAll(".budget-amt[data-usd]").forEach(function(el) {
+      var txt = el.textContent.replace(/[$\u20ac\u00a3,\s]/g,"").replace(/~\$[\d.]+/,"").trim();
+      var num = parseFloat(txt);
+      if (isNaN(num)) num = parseFloat(el.dataset.usd) || 0;
+      total += num;
+    });
+    var el = document.getElementById("budget-total");
+    var formatted = "$" + total.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+    if (el) el.textContent = formatted;
+    var widget = document.getElementById("budget-total-widget");
+    if (widget) widget.textContent = formatted;
+    saveBudgetToStorage();
+  }
+
+  // ── CALENDAR PINCH + SWIPE ────────────────────────────────────
+  var soloWeek = null;
+  function expandWeek(weekEl) {
+    var weeks = document.querySelectorAll(".cal-week");
+    var btn = document.getElementById("cal-back-btn");
+    if (!weekEl) {
+      weeks.forEach(function(w){ w.classList.remove("week-hidden"); });
+      soloWeek = null;
+      if (btn) btn.classList.remove("visible");
+    } else {
+      weeks.forEach(function(w){ w.classList.toggle("week-hidden", w !== weekEl); });
+      soloWeek = weekEl;
+      if (btn) btn.classList.add("visible");
+    }
+  }
+
+  function initCalPinchSwipe() {
+    var grid = document.querySelector(".cal-grid");
+    if (!grid) return;
+    var startX = 0, startDist = 0, pinching = false;
+    grid.addEventListener("touchstart", function(e) {
+      if (e.touches.length === 2) {
+        pinching = true;
+        var dx = e.touches[0].clientX - e.touches[1].clientX;
+        var dy = e.touches[0].clientY - e.touches[1].clientY;
+        startDist = Math.sqrt(dx*dx + dy*dy);
+      } else { startX = e.touches[0].clientX; pinching = false; }
+    }, { passive: true });
+    grid.addEventListener("touchmove", function(e) {
+      if (!pinching || e.touches.length < 2) return;
+      var dx = e.touches[0].clientX - e.touches[1].clientX;
+      var dy = e.touches[0].clientY - e.touches[1].clientY;
+      var dist = Math.sqrt(dx*dx + dy*dy);
+      if (dist / startDist > 1.35 && !soloWeek) {
+        var mid = [(e.touches[0].clientX+e.touches[1].clientX)/2, (e.touches[0].clientY+e.touches[1].clientY)/2];
+        var el = document.elementFromPoint(mid[0], mid[1]);
+        var week = el ? el.closest(".cal-week") : null;
+        if (week) expandWeek(week);
+      }
+    }, { passive: true });
+    grid.addEventListener("touchend", function(e) {
+      if (pinching) { pinching = false; return; }
+      var dx = e.changedTouches[0].clientX - startX;
+      if (Math.abs(dx) < 55 || soloWeek) return;
+      var wrap = document.querySelector(".cal-wrap");
+      if (!wrap) return;
+      var weeks = document.querySelectorAll(".cal-week");
+      var wh = weeks[0] ? weeks[0].offsetHeight + 4 : 100;
+      wrap.scrollBy({ top: dx < 0 ? wh : -wh, behavior: "smooth" });
+    }, { passive: true });
+  }
+
+  // ── CACHE SIZE DISPLAY ───────────────────────────────────────
+  function updateCacheSize() {
+    if (!window.caches) return;
+    var providerBuckets = ['moorea-carto','moorea-osm','moorea-arcgis','moorea-topo','moorea-hot','moorea-sea','moorea-app-v4'];
+    Promise.all(providerBuckets.map(function(name) {
+      return caches.open(name).then(function(cache) {
+        return cache.keys().then(function(keys) {
+          return Promise.all(keys.map(function(req) {
+            return cache.match(req).then(function(res) {
+              return res ? res.clone().blob().then(function(b){ return b.size; }) : 0;
+            }).catch(function(){ return 0; });
+          })).then(function(sizes){ return sizes.reduce(function(a,b){ return a+b; }, 0); });
+        });
+      }).catch(function(){ return 0; });
+    })).then(function(totals) {
+      var total = totals.reduce(function(a,b){ return a+b; }, 0);
+      var el = document.getElementById('cache-size-display');
+      if (el) {
+        if (total > 0) {
+          var mb = (total / 1048576).toFixed(1);
+          el.textContent = '💾 ' + mb + ' MB cached offline';
+          el.style.color = '#2E7D32';
+        } else {
+          el.textContent = '💾 No offline cache yet';
+          el.style.color = 'var(--muted)';
+        }
+      }
+    });
+  }
+
+  // ── COPY BOOKING REFS ON TAP ─────────────────────────────────
+  function initRefCopy() {
+    document.querySelectorAll('.ref').forEach(function(el) {
+      el.title = 'Tap to copy';
+      el.addEventListener('click', function() {
+        var text = el.textContent.trim();
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(text).then(function() {
+            var orig = el.textContent; el.textContent = '✓ Copied!';
+            setTimeout(function(){ el.textContent = orig; }, 1200);
+          });
+        } else {
+          var r = document.createRange(); r.selectNode(el);
+          window.getSelection().removeAllRanges(); window.getSelection().addRange(r);
+          try { document.execCommand('copy'); } catch(e) {}
+          window.getSelection().removeAllRanges();
+        }
+      });
+    });
+  }
+
+  // ── PHONE TEL: LINKS ─────────────────────────────────────────
+  function initTelLinks() {
+    var phoneRe = /(\+[\d][\d\s\-().]{6,}[\d])/g;
+    function wrapNode(node) {
+      var txt = node.nodeValue; phoneRe.lastIndex = 0;
+      if (!phoneRe.test(txt)) return; phoneRe.lastIndex = 0;
+      var frag = document.createDocumentFragment(), last = 0, m;
+      while ((m = phoneRe.exec(txt)) !== null) {
+        if (m.index > last) frag.appendChild(document.createTextNode(txt.slice(last, m.index)));
+        var a = document.createElement('a');
+        a.href = 'tel:' + m[1].replace(/[\s\-().]/g,'');
+        a.textContent = m[1]; a.style.cssText = 'color:var(--lagoon);white-space:nowrap;';
+        frag.appendChild(a); last = m.index + m[1].length;
+      }
+      if (last < txt.length) frag.appendChild(document.createTextNode(txt.slice(last)));
+      node.parentNode.replaceChild(frag, node);
+    }
+    function walk(el) {
+      if (!el || el.tagName === 'A' || el.tagName === 'SCRIPT' || el.tagName === 'STYLE') return;
+      Array.from(el.childNodes).forEach(function(n){ n.nodeType === 3 ? wrapNode(n) : walk(n); });
+    }
+    walk(document.body);
+  }
+
+  // ── SHAKE TO CLEAR FILTER ─────────────────────────────────────
+  function initShake() {
+    if (!window.DeviceMotionEvent) return;
+    var lastAcc = null, lastShake = 0, threshold = 18;
+    var handler = function(e) {
+      var acc = e.accelerationIncludingGravity;
+      if (!acc) return;
+      if (lastAcc) {
+        var delta = Math.abs(acc.x - lastAcc.x) + Math.abs(acc.y - lastAcc.y) + Math.abs(acc.z - lastAcc.z);
+        var now = Date.now();
+        if (delta > threshold && now - lastShake > 1200 && calFilter) {
+          lastShake = now;
+          setCalFilter(calFilter, ''); // clear active filter
+          // Brief haptic if available
+          if (navigator.vibrate) navigator.vibrate([30, 20, 30]);
+        }
+      }
+      lastAcc = { x: acc.x, y: acc.y, z: acc.z };
+    };
+    // iOS 13+ requires permission
+    if (typeof DeviceMotionEvent.requestPermission === 'function') {
+      document.addEventListener('click', function ask() {
+        DeviceMotionEvent.requestPermission().then(function(r) {
+          if (r === 'granted') window.addEventListener('devicemotion', handler);
+        }).catch(function(){});
+        document.removeEventListener('click', ask);
+      }, { once: true });
+    } else {
+      window.addEventListener('devicemotion', handler, { passive: true });
+    }
+  }
+
+  // ── GPS DISTANCE LIVE POLLING (30s while on Overview tab) ────
+  var gpsWatchId = null, lastGPSPos = null;
+
+  function updateDistancesFromPos(pos) {
+    lastGPSPos = pos;
+    var lat = pos.coords.latitude, lon = pos.coords.longitude;
+    document.querySelectorAll('#pane-overview .ref-table tr[data-nearest] td[onclick]').forEach(function(td) {
+      var m = (td.getAttribute('onclick')||'').match(/panToPlaceOnMap\('([^']+)'\)/);
+      var pc = m ? placeCoords[m[1]] : null;
+      if (!pc) return;
+      var d = kmBetween(lat, lon, pc[0], pc[1]);
+      var row = td.closest('tr');
+      var lastTd = row ? row.querySelector('td:last-child') : null;
+      if (!lastTd) return;
+      var note = lastTd.querySelector('.gps-dist') || document.createElement('span');
+      note.className = 'gps-dist';
+      note.style.cssText = 'display:block;font-size:0.7rem;color:var(--lagoon);margin-top:0.1rem;';
+      note.dataset.km = d; note.textContent = formatDist(d);
+      lastTd.appendChild(note);
+    });
+  }
+
+  function startGPSPoll() {
+    if (!navigator.geolocation || gpsWatchId) return;
+    gpsWatchId = setInterval(function() {
+      navigator.geolocation.getCurrentPosition(updateDistancesFromPos, function(){}, { maximumAge: 30000, timeout: 8000 });
+    }, 30000);
+    // Immediate first update
+    navigator.geolocation.getCurrentPosition(updateDistancesFromPos, function(){}, { maximumAge: 60000, timeout: 8000 });
+  }
+  function stopGPSPoll() { if (gpsWatchId) { clearInterval(gpsWatchId); gpsWatchId = null; } }
+
+
+  // ── SORT BUDGET TABLE BY COLUMN ──────────────────────────────
+  var _sortBudgetDir = {};
+  function sortBudget(colIdx) {
+    var table = document.querySelector('#pane-budget .ref-table');
+    if (!table) return;
+    var allRows = Array.from(table.querySelectorAll('tr'));
+    var head = allRows.filter(function(r){ return r.classList.contains('tbl-head'); });
+    var total = allRows.filter(function(r){ return r.classList.contains('tbl-total'); });
+    var dataRows = allRows.filter(function(r){ return !r.classList.contains('tbl-head') && !r.classList.contains('tbl-total'); });
+    var dir = (_sortBudgetDir[colIdx] === 'asc') ? 'desc' : 'asc';
+    _sortBudgetDir = {}; _sortBudgetDir[colIdx] = dir;
+    dataRows.sort(function(a, b) {
+      if (colIdx === 1) {
+        var ua = parseFloat((a.querySelector('.budget-amt')||{}).dataset && a.querySelector('.budget-amt').dataset.usd) || 0;
+        var ub = parseFloat((b.querySelector('.budget-amt')||{}).dataset && b.querySelector('.budget-amt').dataset.usd) || 0;
+        return dir === 'asc' ? ua - ub : ub - ua;
+      }
+      var ta = (a.querySelectorAll('td')[colIdx]||{}).textContent||'';
+      var tb = (b.querySelectorAll('td')[colIdx]||{}).textContent||'';
+      ta = ta.replace(/[^\w\s]/g,'').trim().toLowerCase();
+      tb = tb.replace(/[^\w\s]/g,'').trim().toLowerCase();
+      return dir === 'asc' ? ta.localeCompare(tb) : tb.localeCompare(ta);
+    });
+    head.forEach(function(r){ table.appendChild(r); });
+    dataRows.forEach(function(r){ table.appendChild(r); });
+    total.forEach(function(r){ table.appendChild(r); });
+    document.querySelectorAll('#pane-budget .ref-table .bsort-arrow').forEach(function(el){ el.textContent=''; });
+    var thRow = document.querySelector('#pane-budget .ref-table .tbl-head');
+    if (thRow) { var td = thRow.querySelectorAll('td')[colIdx]; if (td) { var arr = td.querySelector('.bsort-arrow'); if (arr) arr.textContent = dir==='asc'?' ↑':' ↓'; } }
+  }
+
+  // ── SORT MUST GO-TO TABLE BY COLUMN ──────────────────────────
+  var _sortTableDir = {};
+  function sortTable(colIdx) {
+    var table = document.querySelector('#pane-overview .ref-table');
+    if (!table) return;
+    var allRows = Array.from(table.querySelectorAll('tr'));
+    var sectionHeaders = allRows.filter(function(r) { return r.querySelector('td[colspan]'); });
+    var dataRows = allRows.filter(function(r) { return !r.classList.contains('tbl-head') && !r.querySelector('td[colspan]'); });
+    dataRows.forEach(function(r, i) { if (r.dataset.origIdx == null) r.dataset.origIdx = i; });
+    var dir = (_sortTableDir[colIdx] === 'asc') ? 'desc' : 'asc';
+    _sortTableDir = {}; _sortTableDir[colIdx] = dir;
+    dataRows.sort(function(a, b) {
+      var ta = (a.querySelectorAll('td')[colIdx] || {}).textContent || '';
+      var tb = (b.querySelectorAll('td')[colIdx] || {}).textContent || '';
+      ta = ta.replace(/[^\w\s]/g,'').trim().toLowerCase();
+      tb = tb.replace(/[^\w\s]/g,'').trim().toLowerCase();
+      return dir === 'asc' ? ta.localeCompare(tb) : tb.localeCompare(ta);
+    });
+    sectionHeaders.forEach(function(h) { h.style.display = 'none'; });
+    dataRows.forEach(function(r) { table.appendChild(r); });
+    document.querySelectorAll('#pane-overview .ref-table .sort-arrow').forEach(function(el){ el.textContent=''; });
+    var thRow = document.querySelector('#pane-overview .ref-table .tbl-head');
+    if (thRow) { var td = thRow.querySelectorAll('td')[colIdx]; if (td) { var arr = td.querySelector('.sort-arrow'); if (arr) arr.textContent = dir==='asc'?' ↑':' ↓'; } }
+  }
+
+  // ── XPF TOGGLE ───────────────────────────────────────────────
+  function toggleXPF() {
+    document.body.classList.toggle('show-xpf', document.getElementById('xpf-toggle').checked);
+  }
+
+  // ── BEEN THERE CHECKBOXES ─────────────────────────────────────
+  // Tracks which place keys are "been there" — used by filter/opacity functions
+  var beenThereKeys = {};
+
+  function applyBeenThereOpacity() {
+    if (!placesLayer) return;
+    placesLayer.eachLayer(function(m) {
+      var ll = m.getLatLng();
+      // Match marker to placeCoords key
+      var matched = Object.keys(placeCoords).find(function(k) {
+        return Math.abs(placeCoords[k][0] - ll.lat) < 0.0005 && Math.abs(placeCoords[k][1] - ll.lng) < 0.0005;
+      });
+      if (matched && beenThereKeys[matched]) {
+        m.setOpacity(0.01);
+      }
+    });
+  }
+
+  function initBeenThere() {
+    document.querySelectorAll('#pane-overview .ref-table tr[data-nearest]').forEach(function(row, i) {
+      var key = 'been_' + i;
+      // Extract the place map key from the first td's onclick
+      var firstTd = row.querySelector('td[onclick]');
+      var placeKey = null;
+      if (firstTd) {
+        var match = (firstTd.getAttribute('onclick') || '').match(/panToPlaceOnMap\('([^']+)'\)/);
+        if (match) placeKey = match[1];
+      }
+      // Restore been-there state
+      if (localStorage.getItem(key) === '1') {
+        row.classList.add('been-there');
+        if (placeKey) beenThereKeys[placeKey] = true;
+      }
+      // Create checkbox td
+      var cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.style.cssText = 'width:18px;height:18px;accent-color:#2E7D32;cursor:pointer;display:block;margin:auto;';
+      cb.checked = localStorage.getItem(key) === '1';
+      cb.addEventListener('change', function() {
+        localStorage.setItem(key, cb.checked ? '1' : '0');
+        row.classList.toggle('been-there', cb.checked);
+        if (placeKey) {
+          beenThereKeys[placeKey] = cb.checked;
+          // Grey out or restore the map marker immediately
+          if (placesLayer) {
+            placesLayer.eachLayer(function(m) {
+              var ll = m.getLatLng();
+              var pc = placeCoords[placeKey];
+              if (pc && Math.abs(pc[0]-ll.lat)<0.0005 && Math.abs(pc[1]-ll.lng)<0.0005) {
+                m.setOpacity(cb.checked ? 0.01 : 1);
+              }
+            });
+          }
+        }
+      });
+      var td = document.createElement('td');
+      td.style.cssText = 'padding:0.6rem 1rem;text-align:center;vertical-align:middle;border-left:1px solid rgba(0,0,0,0.06);';
+      td.appendChild(cb);
+      row.appendChild(td);
+    });
+    // Apply been-there greyout to map after a short delay (map may not be ready yet)
+    setTimeout(applyBeenThereOpacity, 500);
+  }
+
+  // ── MY LOCATION (map) ─────────────────────────────────────────
+  function addMyLocationButton() {
+    if (!mapObj) return;
+    var btn = document.createElement('button');
+    btn.className = 'map-myloc';
+    btn.title = 'Show my location';
+    btn.innerHTML = '📍';
+    btn.onclick = function() {
+      if (!navigator.geolocation) { alert('Geolocation not supported'); return; }
+      navigator.geolocation.getCurrentPosition(function(pos) {
+        var ll = [pos.coords.latitude, pos.coords.longitude];
+        var myIcon = L.divIcon({
+          html: '<div style="width:14px;height:14px;border-radius:50%;background:#2196F3;border:3px solid #fff;box-shadow:0 0 0 3px rgba(33,150,243,0.35)"></div>',
+          iconSize:[14,14], iconAnchor:[7,7], className:''
+        });
+        L.marker(ll, {icon:myIcon}).addTo(mapObj).bindPopup('📍 You are here').openPopup();
+        mapObj.flyTo(ll, 13, {duration:0.8});
+        startGPSPoll();
+      }, function() { alert('Could not get your location'); });
+    };
+    document.getElementById('map').style.position = 'relative';
+    document.getElementById('map').appendChild(btn);
+    // Fullscreen toggle button
+    var fsBtn = document.createElement('button');
+    fsBtn.className = 'map-fs-btn';
+    fsBtn.title = 'Toggle fullscreen map';
+    fsBtn.innerHTML = '⛶';
+    fsBtn.onclick = function() { toggleMapFullscreen(); };
+    document.getElementById('map').appendChild(fsBtn);
+  }
+
+  function toggleMapFullscreen() {
+    var mapEl = document.getElementById('map');
+    var fsBtn = mapEl.querySelector('.map-fs-btn');
+    var isFs = mapEl.classList.contains('map-fullscreen');
+    if (!isFs) {
+      // Enter fullscreen: reparent map to body so fixed positioning isn't confined by tab-pane's stacking context
+      mapEl._fsPlaceholder = document.createElement('div');
+      mapEl._fsPlaceholder.id = 'map-fs-placeholder';
+      mapEl.parentNode.insertBefore(mapEl._fsPlaceholder, mapEl);
+      document.body.appendChild(mapEl);
+      mapEl.classList.add('map-fullscreen');
+      if (fsBtn) fsBtn.innerHTML = '✕';
+      document.body.style.overflow = 'hidden';
+      setTimeout(function(){ if (mapObj) mapObj.invalidateSize(); }, 50);
+      function exitOnEsc(e){ if(e.key==='Escape'){ toggleMapFullscreen(); document.removeEventListener('keydown',exitOnEsc); } }
+      document.addEventListener('keydown', exitOnEsc);
+    } else {
+      // Exit fullscreen: restore map to original position
+      mapEl.classList.remove('map-fullscreen');
+      if (fsBtn) fsBtn.innerHTML = '⛶';
+      document.body.style.overflow = '';
+      if (mapEl._fsPlaceholder) {
+        mapEl._fsPlaceholder.parentNode.insertBefore(mapEl, mapEl._fsPlaceholder);
+        mapEl._fsPlaceholder.remove();
+        mapEl._fsPlaceholder = null;
+      }
+      setTimeout(function(){ if (mapObj) mapObj.invalidateSize(); }, 50);
+    }
+  }
+
+  // ── PLACE MAP JUMP (Must Go-To table click) ──────────────────
+  // Maps place keys to their placePin coordinates
+  var placeCoords = {
+    afareaitu:     [-17.540820,-149.792865], agri:      [-17.532937,-149.833954],
+    belvedere:     [-17.540301,-149.826882], magicmtn:  [-17.504193,-149.869038],
+    snorkel:       [-17.488,   -149.906   ], tepua:     [-17.492795,-149.826284],
+    threecocos:    [-17.540390,-149.826759], taahiatiahura:[-17.491617,-149.850482],
+    taahia:        [-17.491685,-149.850340], temae:     [-17.497793,-149.759459],
+    tipaniers:     [-17.490571,-149.905302], wedovaa:   [-17.545748,-149.890845],
+    allopizza:     [-17.493962,-149.816955], caramelin: [-17.482138,-149.806961],
+    cocobeach:     [-17.488791,-149.910611], lezard:    [-17.501079,-149.914812],
+    rotui:         [-17.489741,-149.829044], roulotte:  [-17.574858,-149.854855],
+    rudys:         [-17.483251,-149.810973], mahana:    [-17.491635,-149.882974],
+    autea:         [-17.584630,-149.840113], motugrill: [-17.485802,-149.764272],
+    holysteak:     [-17.493845,-149.894255], rendez:    [-17.508981,-149.769326],
+    mozcafe:       [-17.481505,-149.807438], apicoffee: [-17.578203,-149.798074],
+    carmeline:     [-17.482160,-149.807025], lemaa:     [-17.488849,-149.827731],
+    teanahei:      [-17.483437,-149.813117],
+  };
+  function panToPlaceOnMap(key) {
+    var coords = placeCoords[key];
+    if (!coords) return;
+    // Switch to overview, init map, fly to location
+    var overviewBtn = document.getElementById('btn-overview');
+    showTab('overview', overviewBtn);
+    setTimeout(function() {
+      initMap();
+      if (mapObj) {
+        mapObj.invalidateSize();
+        mapObj.flyTo(coords, 15, { animate: true, duration: 0.9 });
+        // Open closest placePin popup
+        if (placesLayer) {
+          var best = null, bestD = Infinity;
+          placesLayer.eachLayer(function(m) {
+            var ll = m.getLatLng();
+            var d = Math.abs(ll.lat - coords[0]) + Math.abs(ll.lng - coords[1]);
+            if (d < bestD) { bestD = d; best = m; }
+          });
+          if (best) setTimeout(function() { best.openPopup(); }, 950);
+        }
+      }
+    }, 120);
+  }
+
+  // ── CURRENCY CONVERTER ────────────────────────────────────────
+  var RATES = { usd_xpf: 104, eur_xpf: 119.33, usd_eur: 0.89 };
+  function fmtNum(n, decimals) {
+    return n.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+  }
+  function parseNum(str) {
+    // Accept: 1200, 1,200, 1200.00, 1,200.00, $1,200, €1.200, etc.
+    return parseFloat((str || '').replace(/[$€£¥\s]/g, '').replace(/,/g, '').trim()) || 0;
+  }
+  function convertCurrency(from) {
+    var uIn = document.getElementById('usd-in');
+    var xIn = document.getElementById('xpf-in');
+    var eIn = document.getElementById('eur-in');
+    if (!uIn) return;
+    var v = parseNum((from==='usd'?uIn:from==='xpf'?xIn:eIn).value);
+    if (from === 'usd') {
+      xIn.value = fmtNum(Math.round(v * RATES.usd_xpf), 0);
+      eIn.value = fmtNum(v * RATES.usd_eur, 2);
+    } else if (from === 'xpf') {
+      uIn.value = fmtNum(v / RATES.usd_xpf, 2);
+      eIn.value = fmtNum(v / RATES.eur_xpf, 2);
+    } else {
+      xIn.value = fmtNum(Math.round(v * RATES.eur_xpf), 0);
+      uIn.value = fmtNum(v / RATES.usd_eur, 2);
+    }
+  }
+
+  // ── SWIPE GESTURES (mobile tab switching) ────────────────────
+  function initSwipe() {
+    var tabs = ['overview','stay1','stay2','stay3','stay4','budget'];
+    var startX = 0, startY = 0;
+    document.addEventListener('touchstart', function(e) {
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+    }, { passive: true });
+    document.addEventListener('touchend', function(e) {
+      var dx = e.changedTouches[0].clientX - startX;
+      var dy = e.changedTouches[0].clientY - startY;
+      if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx) * 0.8) return;
+      var cur = tabs.findIndex(function(t) { return document.getElementById('pane-'+t).classList.contains('active'); });
+      var next = dx < 0 ? Math.min(cur+1, tabs.length-1) : Math.max(cur-1, 0);
+      if (next !== cur) {
+        var btn = document.getElementById('btn-'+tabs[next]);
+        if (btn) { showTab(tabs[next], btn); btn.scrollIntoView({behavior:'smooth',inline:'nearest',block:'nearest'}); }
+      }
+    }, { passive: true });
+  }
+
+  // Update keyboard shortcuts to include budget tab
+  function initKeyboard() {
+    var tabs = ['overview','stay1','stay2','stay3','stay4','budget'];
+    document.addEventListener('keydown', function(e) {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return;
+      var cur = tabs.findIndex(function(t) { return document.getElementById('pane-'+t).classList.contains('active'); });
+      if (e.key === 'ArrowRight') {
+        var next = (cur+1) % tabs.length, btn = document.getElementById('btn-'+tabs[next]);
+        showTab(tabs[next], btn); btn.scrollIntoView({behavior:'smooth',inline:'nearest',block:'nearest'});
+      } else if (e.key === 'ArrowLeft') {
+        var prev = (cur-1+tabs.length) % tabs.length, btnP = document.getElementById('btn-'+tabs[prev]);
+        showTab(tabs[prev], btnP); btnP.scrollIntoView({behavior:'smooth',inline:'nearest',block:'nearest'});
+      }
+    });
+  }
+
+  // ── CALENDAR FILTER + MUST GO-TO PROXIMITY ───────────────────
+  var calFilter = null;
+
+
+  // ── DISTANCE UNITS ───────────────────────────────────────────
+  var _useMiles = localStorage.getItem('moorea-units') === 'mi';
+  function formatDist(km) {
+    return _useMiles ? (km * 0.621371).toFixed(1) + ' mi' : km.toFixed(1) + ' km';
+  }
+  function setDistUnits(toMiles) {
+    _useMiles = toMiles;
+    localStorage.setItem('moorea-units', toMiles ? 'mi' : 'km');
+    var track = document.getElementById('units-track');
+    var thumb = document.getElementById('units-thumb');
+    if (track) track.style.background = toMiles ? 'var(--ocean)' : '#ccc';
+    if (thumb) thumb.style.transform = toMiles ? 'translateX(16px)' : '';
+    document.querySelectorAll('.gps-dist[data-km]').forEach(function(el) {
+      el.textContent = formatDist(parseFloat(el.dataset.km));
+    });
+  }
+
+  // Haversine distance in km
+  function kmBetween(lat1, lon1, lat2, lon2) {
+    var R = 6371, dLat = (lat2-lat1)*Math.PI/180, dLon = (lon2-lon1)*Math.PI/180;
+    var a = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
+
+  // Stay centre coords for proximity filtering
+  var stayCentres = {
+    bay:  [-17.4924,  -149.8174],
+    cook: [-17.4899,  -149.8275],
+    fare: [-17.4934,  -149.8987],
+    pap:  [-17.536,   -149.568],
+  };
+
+  // Activities that run during each BnB stay — kept visible when that stay is filtered
+  var stayActivities = {
+    bay:  ['tiki', 'aroa'],
+    cook: ['atv', 'massage', 'jetski'],
+    fare: ['aquablue', 'tipnautic'],
+    pap:  []
+  };
+  var bnbPinKeys = ['bay', 'cook', 'fare', 'pap'];
+
+  function filterMainPins(cat) {
+    if (!cat) return;
+    var isStay = bnbPinKeys.indexOf(cat) >= 0;
+    var myActs  = stayActivities[cat] || [];
+    Object.keys(pins).forEach(function(key) {
+      var p = pins[key]; if (!p || !p.marker) return;
+      var op;
+      if (isStay) {
+        if (key === cat) {
+          op = 1;                                    // selected stay: full
+        } else if (bnbPinKeys.indexOf(key) >= 0) {
+          op = 0.15;                                 // other BnB pins: heavily dimmed
+        } else if (myActs.indexOf(key) >= 0) {
+          op = 1;                                    // concurrent activity: full
+        } else if (key === 'vaiare') {
+          op = 0.5;                                  // rental car used whole trip: partial
+        } else {
+          op = 0.15;                                 // other activities/pins: dimmed
+        }
+      } else {
+        op = 1;                                      // non-stay filter: show all pins
+      }
+      p.marker.setOpacity(op);
+    });
+  }
+
+  function clearMainPins() {
+    Object.keys(pins).forEach(function(key) {
+      if (pins[key] && pins[key].marker) pins[key].marker.setOpacity(1);
+    });
+  }
+
+  function filterPlacesByProximity(cat) {
+    if (!placesLayer) return;
+    var centre = stayCentres[cat];
+    if (!centre) {
+      placesLayer.eachLayer(function(m) { var ll=m.getLatLng(); var k=Object.keys(placeCoords).find(function(pk){var pc=placeCoords[pk];return pc&&Math.abs(pc[0]-ll.lat)<0.0005&&Math.abs(pc[1]-ll.lng)<0.0005;}); m.setOpacity((k&&beenThereKeys[k])?0.01:1); });
+      return;
+    }
+    // Apply 1.3x road factor over straight-line (Moorea ring road approximation)
+    var radius = 10;
+    placesLayer.eachLayer(function(m) {
+      var ll = m.getLatLng();
+      var dRoad = kmBetween(centre[0], centre[1], ll.lat, ll.lng) * 1.3;
+      // Check been-there state: matched by coordinates
+      var pcKey = Object.keys(placeCoords).find(function(k){ var ll=m.getLatLng(); var pc=placeCoords[k]; return pc&&Math.abs(pc[0]-ll.lat)<0.0005&&Math.abs(pc[1]-ll.lng)<0.0005; });
+      var wasBeen = pcKey && beenThereKeys[pcKey];
+      m.setOpacity(wasBeen ? 0.01 : dRoad <= radius ? 1 : 0.08);
+    });
+    // Dim/show main circular map pins by stay-aware logic
+    filterMainPins(cat);
+  }
+
+  function setCalFilter(cat, pinKey) {
+    // Always switch to Overview so calendar + map are visible
+    var overviewBtn = document.getElementById('btn-overview');
+    showTab('overview', overviewBtn);
+
+    if (calFilter === cat) {
+      // Clear filter on second click
+      calFilter = null;
+      document.querySelectorAll('.hlbtn').forEach(function(b) { b.classList.remove('fon'); });
+      document.querySelectorAll('.cal-ev').forEach(function(ev) { ev.classList.remove('fdim', 'fdim-bnb'); });
+      document.querySelectorAll('.cal-day').forEach(function(d) { d.classList.remove('fdim'); });
+      if (placesLayer) placesLayer.eachLayer(function(m) { var ll=m.getLatLng(); var k=Object.keys(placeCoords).find(function(pk){var pc=placeCoords[pk];return pc&&Math.abs(pc[0]-ll.lat)<0.0005&&Math.abs(pc[1]-ll.lng)<0.0005;}); m.setOpacity((k&&beenThereKeys[k])?0.01:1); });
+      clearMainPins();  // restore all main pins immediately
+      filterMustGoToTable(null);
+    } else {
+      calFilter = cat;
+      document.querySelectorAll('.hlbtn').forEach(function(b) { b.classList.remove('fon'); });
+      document.querySelector('[data-filter="' + cat + '"]').classList.add('fon');
+      // Dim non-matching calendar events
+      var isStayFilter = bnbPinKeys.indexOf(cat) >= 0;
+      document.querySelectorAll('.cal-ev').forEach(function(ev) {
+        ev.classList.remove('fdim', 'fdim-bnb');
+        if (!isStayFilter) {
+          // Non-BnB filter: existing behavior
+          if (!ev.classList.contains(cat)) ev.classList.add('fdim');
+          return;
+        }
+        // BnB filter: full for matching stay, full for same-day concurrent, 35% for everything else
+        if (ev.classList.contains(cat)) return; // matching BnB: full
+        var parentDay = ev.closest('.cal-day');
+        var isConcurrent = parentDay && parentDay.querySelector('.cal-ev.' + cat);
+        if (!isConcurrent) ev.classList.add('fdim-bnb'); // 35%
+        // if concurrent (same day as selected BnB), leave at full opacity
+      });
+      // Dim days that have no matching event
+      document.querySelectorAll('.cal-day.in-trip').forEach(function(day) {
+        day.classList.toggle('fdim', !day.querySelector('.cal-ev.' + cat));
+      });
+      // Filter map pins immediately (doesn't need map to be initialized)
+      filterMainPins(cat);
+      // Pan map + filter Must Go-To places by proximity
+      filterMustGoToTable(cat);
+      if (pinKey) {
+        setTimeout(function() {
+          initMap();
+          filterMainPins(cat);   // re-apply after initMap ensures pins{} is populated
+          filterPlacesByProximity(cat);
+          filterMustGoToTable(cat);
+          var p = pins[pinKey];
+          if (!p) return;
+          mapObj.flyTo([p.lat, p.lng], 13, { animate: true, duration: 0.9 });
+          setTimeout(function() { p.marker.openPopup(); }, 950);
+        }, 120);
+      } else {
+        // no pinKey (e.g. flight) — still apply pin filter after map ready
+        setTimeout(function() { initMap(); filterMainPins(cat); }, 120);
+      }
+    }
+  }
+
+  // ── TABS + DEEP LINKS ─────────────────────────────────────────
+  function showTab(name, btn) {
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('pane-' + name).classList.add('active');
+    btn.classList.add('active');
+    if (name === 'overview') { setTimeout(function() { initMap(); if (mapObj) mapObj.invalidateSize(); }, 80); } else { stopGPSPoll(); }
+    history.replaceState(null, '', '#' + name);
+    // re-run scroll observer for newly visible day cards
+    document.querySelectorAll('#pane-' + name + ' .day-card:not(.visible)').forEach(observeCard);
+  }
+
+  // ── DARK MODE ─────────────────────────────────────────────────
+  function toggleDark() {
+    var d = document.body.classList.toggle('dark');
+    document.getElementById('darkBtn').textContent = d ? '☀ Light' : '🌙 Dark';
+    localStorage.setItem('dark', d ? '1' : '0');
+  }
+
+  // ── COUNTDOWN ─────────────────────────────────────────────────
+  function updateCountdown() {
+    var tripStart = new Date('2026-09-18');
+    var tripEnd   = new Date('2026-10-07');
+    var now       = new Date();
+    var el        = document.getElementById('countdown');
+    if (!el) return;
+    var msDay   = 86400000;
+    var daysTo  = Math.ceil((tripStart - now) / msDay);
+    var daysIn  = Math.floor((now - tripStart) / msDay);
+    var daysLeft= Math.ceil((tripEnd - now) / msDay);
+    if (daysTo > 0)        el.textContent = daysTo + ' days until departure ✈';
+    else if (daysLeft > 0) el.textContent = '🌺 Trip in progress — Day ' + (daysIn + 1) + ' · ' + daysLeft + ' days remaining';
+    else                   el.textContent = 'Trip completed — welcome home! 🏡';
+  }
+
+  // ── TODAY HIGHLIGHT + JUMP ────────────────────────────────────
+  // ── STAY INDICATOR IN TABS ────────────────────────────────────
+  function markCurrentStay() {
+    var now = new Date();
+    var ranges = [
+      { id: 'btn-stay1', from: new Date('2026-09-21'), to: new Date('2026-09-26') },
+      { id: 'btn-stay2', from: new Date('2026-09-26'), to: new Date('2026-10-01') },
+      { id: 'btn-stay3', from: new Date('2026-10-01'), to: new Date('2026-10-06') },
+      { id: 'btn-stay4', from: new Date('2026-10-06'), to: new Date('2026-10-08') },
+    ];
+    ranges.forEach(function(r) {
+      if (now >= r.from && now < r.to) {
+        var btn = document.getElementById(r.id);
+        if (btn) btn.innerHTML += ' <span style="background:#F5C842;color:#0B4D7C;border-radius:10px;padding:0.1rem 0.4rem;font-size:0.68rem;font-weight:800;vertical-align:middle;margin-left:0.3rem;">NOW</span>';
+      }
+    });
+  }
+
+  // ── WEEK COLLAPSE (mobile) ────────────────────────────────────
+  function initWeekToggles() {
+    if (window.innerWidth > 640) return;
+    document.querySelectorAll('.cal-week').forEach(function(week, i) {
+      var label = 'Week ' + (i + 1);
+      var firstNum = week.querySelector('.cal-num');
+      if (firstNum) label = firstNum.textContent.trim().replace(/\s+/g,' ');
+      var btn = document.createElement('button');
+      btn.className = 'week-toggle';
+      btn.innerHTML = '▾ ' + label;
+      btn.onclick = function() {
+        week.classList.toggle('collapsed');
+        btn.innerHTML = (week.classList.contains('collapsed') ? '▸ ' : '▾ ') + label;
+      };
+      week.parentNode.insertBefore(btn, week);
+    });
+  }
+
+  // ── SCROLL ENTRANCE ANIMATIONS ───────────────────────────────
+  var cardObserver;
+  function observeCard(el) { if (cardObserver) cardObserver.observe(el); }
+
+  function initScrollAnimations() {
+    if (!window.IntersectionObserver) {
+      document.querySelectorAll('.day-card').forEach(function(el) { el.classList.add('visible'); });
+      return;
+    }
+    cardObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(e) {
+        if (e.isIntersecting) { e.target.classList.add('visible'); cardObserver.unobserve(e.target); }
+      });
+    }, { threshold: 0.08 });
+    document.querySelectorAll('.day-card').forEach(observeCard);
+  }
+
+
+
+
+  // ── PERSISTENT TILE CACHE (Cache API, no SW needed, works from file://) ──
+  (function() {
+    if (!window.caches) return;
+    var HOST_BUCKETS = {
+      'cartocdn.com':'moorea-carto', 'openstreetmap.org':'moorea-osm',
+      'arcgisonline.com':'moorea-arcgis', 'opentopomap.org':'moorea-topo',
+      'openstreetmap.fr':'moorea-hot', 'openseamap.org':'moorea-sea'
+    };
+    function bucketFor(url) {
+      var found = 'moorea-tiles-v3';
+      Object.keys(HOST_BUCKETS).forEach(function(h){ if(url.includes(h)) found=HOST_BUCKETS[h]; });
+      return found;
+    }
+    var orig = L.TileLayer.prototype.createTile;
+    L.TileLayer.prototype.createTile = function(coords, done) {
+      var self = this, url = this.getTileUrl(coords);
+      var tile = document.createElement('img');
+      tile.setAttribute('role','presentation');
+      if (this.options.crossOrigin) tile.crossOrigin = (this.options.crossOrigin===true)?'':this.options.crossOrigin;
+      caches.open(bucketFor(url)).then(function(cache) {
+        cache.match(url).then(function(resp) {
+          function fromBlob(blob) {
+            var obj = URL.createObjectURL(blob);
+            tile.onload = function(){ URL.revokeObjectURL(obj); done(null,tile); };
+            tile.onerror = function(e){ URL.revokeObjectURL(obj); done(e,tile); };
+            tile.src = obj;
+          }
+          if (resp) { resp.blob().then(fromBlob); return; }
+          fetch(url,{mode:'cors'}).then(function(r){
+            if(r&&r.ok){ var clone=r.clone(); cache.put(url,clone); r.blob().then(fromBlob); }
+            else { done(null, tile); }
+          }).catch(function(){
+            done(null, tile); // offline + no cache: let Leaflet show blank tile
+          });
+        });
+      }).catch(function(){ return orig.call(self,coords,done); });
+      return tile;
+    };
+  })();
+
+  // ── MAP ────────────────────────────────────────────────────────
+  var mapObj = null, pins = {}, mapReady = false, placesLayer = null, weatherLayer = null;
+
+  function initMap() {
+    if (mapReady) return;
+    try {
+    mapReady = true;
+    var streets   = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>', maxZoom: 19
+    });
+    var satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      attribution: '© Esri', maxZoom: 19
+    });
+    var topoOpen = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenTopoMap contributors', maxZoom: 17, subdomains: 'abc'
+    });
+    var darkMatter = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      attribution: '© CartoDB © OpenStreetMap', maxZoom: 19, subdomains: 'abcd'
+    });
+    var hot = L.tileLayer('https://tile-{s}.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+      attribution: '© Humanitarian OSM © OpenStreetMap', maxZoom: 19, subdomains: 'abc'
+    });
+    var openSeaMap = L.tileLayer('https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png', {
+      attribution: '© OpenSeaMap', maxZoom: 18, opacity: 0.8
+    });
+
+    mapObj = L.map('map', { zoomControl: true }).setView([-17.510, -149.720], 11);
+    placesLayer = L.layerGroup().addTo(mapObj);
+
+    // ── Higher-res base layers ─────────────────────────────────
+    var voyager = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      attribution: '© CartoDB © OpenStreetMap', maxZoom: 19, subdomains: 'abcd'
+    }).addTo(mapObj); // Voyager HD is the default
+
+    // Proper Leaflet layers for Windy and Weather toggles
+    var WindyLayer = L.Layer.extend({
+      onAdd: function() { document.getElementById('windy-panel').style.display='block'; return this; },
+      onRemove: function() { document.getElementById('windy-panel').style.display='none'; }
+    });
+    var windyProxy = new WindyLayer();
+
+    var wxLoaded = false;
+    var WeatherLayer = L.Layer.extend({
+      onAdd: function() {
+        var wx = document.getElementById('map-wx-text'); if (wx) wx.style.display='block';
+        if (!wxLoaded) { wxLoaded = true; loadLiveWeather(); }
+        return this;
+      },
+      onRemove: function() { var wx = document.getElementById('map-wx-text'); if (wx) wx.style.display='none'; }
+    });
+    var weatherProxy = new WeatherLayer();
+
+
+    var layerCtrl = L.control.layers(
+      {
+        '🗺️ Voyager HD (default)': voyager,
+        '🗺️ Streets (OSM)': streets,
+        '🛰 Satellite': satellite,
+        '🏔 OpenTopoMap': topoOpen,
+        '🌑 CartoDB Dark Matter': darkMatter,
+        '🆘 HOT (Humanitarian)': hot
+      },
+      { '📍 Must Go-To Places': placesLayer, '🌤 Weather': weatherProxy, '🌀 Windy': windyProxy, '⚓ OpenSeaMap': openSeaMap },
+      { position: 'topright' }
+    ).addTo(mapObj);
+    // Enable Weather by default
+    mapObj.addLayer(weatherProxy);
+
+    // Inject "Clear Tile Cache" as a real button at the bottom of the layer control
+    (function() {
+      var container = layerCtrl.getContainer().querySelector('.leaflet-control-layers-list') || layerCtrl.getContainer();
+      var sep = document.createElement('div');
+      sep.style.cssText = 'border-top:1px solid #ccc;margin:4px 0;';
+      var btn = document.createElement('button');
+      btn.innerHTML = '🗑 Clear Tile Cache';
+      btn.style.cssText = 'display:block;width:100%;margin-top:2px;padding:4px 8px;font-size:12px;background:#fff;border:1px solid #ccc;border-radius:4px;cursor:pointer;text-align:left;white-space:nowrap;';
+      btn.onmouseover = function(){ this.style.background='#f4f4f4'; };
+      btn.onmouseout  = function(){ this.style.background='#fff'; };
+      btn.onclick = function(e) {
+        L.DomEvent.stopPropagation(e);
+        if (!window.caches) { alert('Cache API not available'); return; }
+        var buckets = ['moorea-carto','moorea-osm','moorea-arcgis','moorea-topo','moorea-hot','moorea-sea','moorea-tiles-v3'];
+        btn.disabled = true; btn.innerHTML = '⏳ Clearing…';
+        Promise.all(buckets.map(function(b){
+          return caches.open(b).then(function(cache){
+            return cache.keys().then(function(ks){ return Promise.all(ks.map(function(k){ return cache.delete(k); })); });
+          });
+        })).then(function(){
+          btn.disabled = false; btn.innerHTML = '🗑 Clear Tile Cache';
+          if (typeof updateCacheSize === 'function') updateCacheSize();
+          alert('✅ Tile cache cleared. Tiles will re-download as you browse the map.');
+        });
+      };
+      L.DomEvent.disableClickPropagation(btn);
+      container.appendChild(sep);
+      container.appendChild(btn);
+    })();
+
+
+    // ── Live weather info box on map (bottom-left) ─────────────
+    var WxControl = L.Control.extend({
+      options: { position: 'bottomleft' },
+      onAdd: function() {
+        var div = L.DomUtil.create('div');
+        div.style.cssText = 'background:rgba(11,77,124,0.88);color:#fff;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;backdrop-filter:blur(4px);max-width:420px;cursor:pointer;line-height:1.8;white-space:nowrap;display:inline-flex;';
+        div.id = 'map-wx-text';
+        div.title = 'Live weather — click for full forecast';
+        div.textContent = '🌤 Loading weather…';
+        div.onclick = function(){ window.open('https://www.meteo.pf','_blank'); };
+        return div;
+      }
+    });
+    new WxControl().addTo(mapObj);
+
+
+    // Fetch weather for the map box after a short delay
+    setTimeout(loadLiveWeather, 1800);
+    // Auto pre-cache Moorea tiles silently in background
+    setTimeout(preCacheMoorea, 4000);
+    // Re-cache after user pans/zooms to capture new tiles (debounced)
+    var reCacheTimer;
+    mapObj.on('moveend zoomend', function() {
+      clearTimeout(reCacheTimer);
+      reCacheTimer = setTimeout(preCacheMoorea, 3000);
+    });
+    // Periodic live data refresh: weather every 10 min, tiles every 60 min
+    setInterval(loadLiveWeather, 600000);
+    setInterval(preCacheMoorea, 3600000);
+
+    // ── Route line (dotted with arrows, Moorea only) ──────────
+    var routeWaypoints = [
+      [-17.519608, -149.779571],  // Vaiare
+      [-17.4924,   -149.8174],    // Bay View
+      [-17.4899,   -149.8275],    // Cook Bay
+      [-17.4934,   -149.8987],    // Fare Mihi
+      [-17.519608, -149.779571],  // Vaiare (return)
+    ];
+    L.polyline(routeWaypoints, { color: '#E53935', weight: 4, dashArray: '10 14', opacity: 0.82 }).addTo(mapObj);
+
+    // ── Ferry crossing: Papeete ↔ Vaiare (dotted blue) ────────
+    L.polyline([
+      [-17.534,    -149.568],    // Papeete quay
+      [-17.519608, -149.779571]  // Vaiare ferry terminal
+    ], { color: '#0277BD', weight: 3, dashArray: '6 10', opacity: 0.75 })
+    .addTo(mapObj)
+    .bindTooltip('⛴ Ferry: Papeete ↔ Moorea (~30 min)', { sticky: true });
+
+    // My location button
+    addMyLocationButton();
+
+    // Arrow markers at each waypoint
+    function arrowMarker(from, to) {
+      var dy = to[0] - from[0], dx = to[1] - from[1];
+      var angle = Math.atan2(dx, dy) * 180 / Math.PI;
+      var mid = [(from[0]+to[0])/2, (from[1]+to[1])/2];
+      var icon = L.divIcon({
+        html: '<div style="width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:12px solid #E53935;transform:rotate('+angle+'deg);filter:drop-shadow(0 1px 2px rgba(0,0,0,0.4))"></div>',
+        iconSize:[12,12], iconAnchor:[6,6], className:''
+      });
+      L.marker(mid, {icon:icon, interactive:false}).addTo(mapObj);
+    }
+    for (var i=0; i<routeWaypoints.length-1; i++) arrowMarker(routeWaypoints[i], routeWaypoints[i+1]);
+
+    function pin(key, lat, lng, color, title, body) {
+      var icon = L.divIcon({
+        html: '<div style="width:16px;height:16px;border-radius:50%;background:'+color+';border:2.5px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,0.5)"></div>',
+        iconSize:[16,16], iconAnchor:[8,8], className:''
+      });
+      var m = L.marker([lat,lng],{icon:icon}).addTo(mapObj)
+               .bindPopup('<strong>'+title+'</strong>'+(body?'<br><span style="font-size:0.82rem;color:#555">'+body+'</span>':''));
+      pins[key] = { marker:m, lat:lat, lng:lng };
+      addLongPressShare(m, title, lat, lng);
+    }
+    function actPin(key, lat, lng, color, title, body) {
+      var icon = L.divIcon({
+        html: '<div style="width:18px;height:18px;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.55))"><div style="width:18px;height:18px;background:'+color+';clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)"></div></div>',
+        iconSize:[18,18], iconAnchor:[9,9], className:''
+      });
+      var m = L.marker([lat,lng],{icon:icon}).addTo(mapObj)
+               .bindPopup('<strong>'+title+'</strong>'+(body?'<br><span style="font-size:0.82rem;color:#555">'+body+'</span>':''));
+      pins[key] = { marker:m, lat:lat, lng:lng };
+      addLongPressShare(m, title, lat, lng);
+    }
+
+    pin('bay',     -17.4924,    -149.8174,   '#1565C0', "Cook's Bay BnB — PK 7.5 côté montagne",        'Sep 21–26 · Check-in 3:00 PM · Checkout 11:00 AM<br>Hosted by Tevaite · 53JGG55M+Q6');
+    pin('cook',    -17.4899,    -149.8275,   '#6A1B9A', "Piha'ena BnB — Fatiha",                         'Sep 26–Oct 1 · Check-in 3:00 PM · Hosted by Fatiha<br>53JGG56F+V3');
+    pin('fare',    -17.4934,    -149.8987,   '#00796B', 'Tiahura BnB — Tiahura',                          'Oct 1–6 · Check-in 4:00 PM · Checkout 10:00 AM<br>Free kayaks · Hosted by Adrien · 53JGG442+MG');
+    pin('papeete', -17.536,     -149.568,    '#5D4037', 'Papeete Matete Studio — 49 Rue Francois Cardella', 'Oct 6–7 · Papeete, Tahiti 98714');
+    pin('vaiare',  -17.519608,  -149.779571, '#33691E', 'Vaiare Ferry Terminal — Avis (Quai de Vaiare)',    'Pickup: Sep 21 · 6:30 AM · Return: Oct 6 · 5:00 PM<br>Reservation #14503779US3');
+    actPin('atv',     -17.488716,  -149.826567, '#E65100', 'Big ATV Tour — Moorea Activities Center',         'Mon Sep 28 · 1:00–4:45 PM · Booking #352658925<br>Pickup 12:45 PM on main road');
+    actPin('tiki',    -17.488983,  -149.817875, '#E65100', 'Moorea Sunset Boat — G56J+9VV',                   'Tue Sep 22 · 4:00–6:00 PM · 2 hrs<br>Confirmation BR-1404916719 · Arrive by 3:45 PM');
+    actPin('jetski',  -17.488716,  -149.826567, '#E65100', 'Grand Tour de Jetski',                            'Wed Sep 30 · 1:00–4:30 PM · Booking #352650850<br>Pickup 12:45 PM on main road');
+    actPin('aquablue',-17.493806,  -149.899379, '#E65100', 'Aquablue Scuba Dive',                             'Fri Oct 2 · 1:30–4:00 PM · Booking #352661829<br>Bus pickup at Magasin Tiahura 1:15 PM');
+    actPin('aroa',    -17.522017,  -149.845083, '#E65100', 'Aroa Coco Plantation Tour — Chocolaterie Aroa',   'Thu Sep 24 · 8:00–11:45 AM · Booking #352712480<br>chocolateriearoa.com');
+    actPin('massage',   -17.491635,  -149.900353, '#E65100', 'MooJanzu Massage',                                'Tue Sep 29 · 10:30 PM · +689 89 21 79 30');
+    actPin('tipnautic', -17.490668,  -149.905183, '#E65100', 'TipNautic Boat Rental',                           '16,000 XPF (~$154) · Tiahura area');
+
+    // ── MUST GO-TO PLACES (diamond markers, toggleable layer) ──
+    function pinShape(color, shape) {
+      if (shape==='circle')   return {html:'<div style="width:13px;height:13px;border-radius:50%;background:'+color+';border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,0.5)"></div>',  size:[13,13],anchor:[6,6]};
+      if (shape==='square')   return {html:'<div style="width:12px;height:12px;background:'+color+';border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,0.5)"></div>',                   size:[12,12],anchor:[6,6]};
+      if (shape==='triangle') return {html:'<div style="width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:14px solid '+color+';filter:drop-shadow(0 1px 2px rgba(0,0,0,0.45))"></div>', size:[16,14],anchor:[8,14]};
+      return {html:'<div style="width:12px;height:12px;background:'+color+';transform:rotate(45deg);border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,0.5)"></div>', size:[14,14],anchor:[7,7]};
+    }
+    function placePin(lat, lng, color, shape, title, body) {
+      var ps = pinShape(color, shape);
+      var icon = L.divIcon({
+        html: ps.html,
+        iconSize: ps.size, iconAnchor: ps.anchor, className:''
+      });
+      var mapsUrl = 'https://maps.apple.com/?ll='+lat+','+lng+'&z=16&q='+encodeURIComponent(title.replace(/[^\w\s]/g,'').trim());
+      var gmaps   = 'https://www.google.com/maps/search/?api=1&query='+lat+','+lng;
+      var popup = '<strong>'+title+'</strong>'
+        +(body?'<br><span style="font-size:0.82rem;color:#666">'+body+'</span>':'')
+        +'<br><a href="'+mapsUrl+'" target="_blank" style="font-size:0.75rem;color:#0277BD;text-decoration:none;margin-right:0.5rem;">📍 Apple Maps</a>'
+        +'<a href="'+gmaps+'" target="_blank" style="font-size:0.75rem;color:#0277BD;text-decoration:none;">🗺 Google Maps</a>';
+      var m = L.marker([lat,lng],{icon:icon}).addTo(placesLayer).bindPopup(popup);
+      addLongPressShare(m, title.replace(/[^\w\s]/g,'').trim(), lat, lng);
+      return m;
+    }
+
+    // 🌿 Experiences & Sights — dark green diamonds
+    placePin(-17.540820,-149.792865,'#2E7D32', 'triangle', '💧 Afareaitu Waterfall',             'Short hike · South side near Afareaitu village');
+    placePin(-17.532937,-149.833954,'#2E7D32', 'triangle', '🍦 Agricultural College Stand',       'Ice cream, jams & produce · Opunohu Valley (Lycée agricole)');
+    placePin(-17.540301,-149.826882,  '#2E7D32', 'triangle','👁 Belvédère Lookout',               'Best view of Cook\'s Bay & Opunohu Bay');
+    placePin(-17.504193,-149.869038,  '#2E7D32', 'triangle','⛰ Magic Mountain Hike',              'Interior trail · Panoramic views');
+    placePin(-17.488,  -149.906,  '#2E7D32', 'triangle','🤿 Snorkeling & Diving',             'The Aquarium · Sofitel/Temae · Hilton Beach · Topdive crash sites');
+    placePin(-17.492795,-149.826284,  '#2E7D32', 'triangle',"🌳 Te Pū 'Ātiti'a",                 'Fallen sacred tree & cultural heritage site');
+    placePin(-17.54039,-149.826759,  '#2E7D32', 'triangle','🥥 Three Coconuts Trail / Three Pines Lookout', 'Scenic ridge hike · Opunohu Valley');
+
+    // 🏖 Beaches — cyan diamonds
+    placePin(-17.491617,-149.850482,'#2E7D32', 'triangle', '🏖 Tiahura Beach',                    'Public beach · Northwest coast near Tiahura');
+    placePin(-17.497793,-149.759459,'#2E7D32', 'triangle', "🤿 Tema'e Beach",                   'Great snorkeling · Northeast coast near the airport');
+    placePin(-17.490571,-149.905302,'#00ACC1', 'circle', '🤿 Tipaniers Beach',                 'Great snorkeling right off the beach · Hotel Les Tipaniers area');
+    placePin(-17.545748,-149.890845,'#2E7D32', 'triangle', "🍍 We DO Va'a Moorea",               'Pineapple Beach');
+
+    // 🍽 Restaurants — amber diamonds
+    placePin(-17.493962,-149.816955,  '#FB8C00', 'square', '🍕 Allo Pizza',                      'Local pizza spot');
+    placePin(-17.482138,-149.806961,  '#FB8C00', 'square', "🍮 Caramel'In Cafe",                 'Café · Northeast coast');
+    placePin(-17.488791,-149.910611,'#FB8C00', 'square', '🏖 Coco Beach',                      'Beachside restaurant · Northwest coast');
+    placePin(-17.501079,-149.914812,'#FB8C00', 'square', '🦎 Le Lézard Jaune Café',            'Café & restaurant · Northwest coast');
+    placePin(-17.489741,-149.829044,  '#FB8C00', 'square', '🍊 Rotui Juice Factory',             'Manutea Tahiti — tropical juice & distillery · Cook\'s Bay area');
+    placePin(-17.584630,-149.840113,  '#FB8C00', 'square', '🍽 Snack AUTEA',                        'Known for mahi-mahi and fish samosas');
+    placePin(-17.485802,-149.764272,  '#FB8C00', 'square', '🍖 Motu Grill',                         'Grill restaurant');
+    placePin(-17.483251,-149.810973,  '#FB8C00', 'square', "🇫🇷 Rudy's Restaurant",               'Known for the French onion soup');
+    placePin(-17.574858,-149.854855,'#FB8C00', 'square', "🚚 Roulotte Daddy's Truck Moorea",  'Food truck');
+    placePin(-17.493845,-149.894255,'#FB8C00', 'square', '🥩 Holy Steak House',                    'Steak restaurant');
+    placePin(-17.508981,-149.769326,'#FB8C00', 'square', '🚐 Roulotte Rendez-vous chez nous',       'Food truck / roulotte');
+    placePin(-17.481505,-149.807438,'#FB8C00', 'square', '☕ Moz Cafe',                             'Brunch and café (poisson cru)');
+    placePin(-17.485802,-149.764272,'#FB8C00', 'square', '🍖 Motu Grill',                           'Grill restaurant');
+    placePin(-17.578203,-149.798074,'#FB8C00', 'square', '☕ Api Coffee',                           'Known for breakfast & coffee');
+    placePin(-17.482160,-149.807025,'#FB8C00', 'square', '🥐 Carmeline',                            'Known for coffee & French pastries');
+    placePin(-17.488849,-149.827731,'#FB8C00', 'square', "🛒 Le Ma'a dans le Bocal",                'Grocery & café · cookies');
+    placePin(-17.483437,-149.813117,'#FB8C00', 'square', '🍢 Snack Teanahei',                       'Known for skewers and poisson cru');
+    placePin(-17.491635,-149.882974,'#FB8C00', 'square', '🍱 Snack Mahana',                    'Local snack bar / casual dining · Known for their poisson');
+    } catch(e) {
+      mapReady = false;
+      console.error('initMap error:', e);
+      var el = document.getElementById('map');
+      if (el) el.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#E53935;font-weight:700;font-size:0.9rem;background:#fff3f3;border-radius:12px;">⚠ Map failed to load — check console for JS error</div>';
+    }
+  }
+
+  // ── LONG-PRESS TO SHARE MAP PIN ───────────────────────────────
+  function addLongPressShare(marker, title, lat, lng) {
+    var pressTimer = null;
+    var el = marker.getElement ? marker.getElement() : null;
+    function startPress(e) {
+      pressTimer = setTimeout(function() {
+        var url = 'https://maps.apple.com/?ll=' + lat + ',' + lng + '&q=' + encodeURIComponent(title);
+        if (navigator.share) {
+          navigator.share({ title: title, text: '📍 ' + title, url: url }).catch(function(){});
+        } else {
+          navigator.clipboard && navigator.clipboard.writeText(url);
+          alert('📋 Link copied: ' + title);
+        }
+      }, 600);
+    }
+    function cancelPress() { clearTimeout(pressTimer); }
+    if (el) {
+      el.addEventListener('touchstart', startPress, { passive: true });
+      el.addEventListener('touchend',   cancelPress);
+      el.addEventListener('touchmove',  cancelPress);
+    }
+    // Also attach to the Leaflet marker events
+    marker.on('mousedown', startPress);
+    marker.on('mouseup',   cancelPress);
+  }
+
+  // ── PULL-TO-REFRESH WEATHER RADAR ─────────────────────────────
+  function initPullToRefreshWeather() {
+    var pane = document.getElementById('pane-overview');
+    if (!pane) return;
+    var startY = 0, pulling = false, indicator = null;
+    pane.addEventListener('touchstart', function(e) {
+      if (pane.scrollTop === 0) { startY = e.touches[0].clientY; pulling = true; }
+    }, { passive: true });
+    pane.addEventListener('touchmove', function(e) {
+      if (!pulling) return;
+      var dy = e.touches[0].clientY - startY;
+      if (dy > 60 && !indicator) {
+        indicator = document.createElement('div');
+        indicator.style.cssText = 'text-align:center;font-size:0.82rem;color:var(--muted);padding:0.5rem;';
+        indicator.textContent = '🌧 Release to refresh weather radar…';
+        pane.prepend(indicator);
+      }
+    }, { passive: true });
+    pane.addEventListener('touchend', function(e) {
+      if (!pulling) return;
+      pulling = false;
+      if (indicator) { indicator.remove(); indicator = null; }
+      var dy = e.changedTouches[0].clientY - startY;
+      if (dy > 60 && typeof weatherLayer !== 'undefined') {
+        fetch('https://api.rainviewer.com/public/weather-maps.json')
+          .then(function(r){ return r.json(); })
+          .then(function(data){
+            var frames = data.radar && data.radar.past;
+            if (frames && frames.length > 0) {
+              weatherLayer.setUrl('https://tilecache.rainviewer.com' + frames[frames.length-1].path + '/256/{z}/{x}/{y}/2/1_1.png');
+            }
+          }).catch(function(){});
+      }
+    }, { passive: true });
+  }
+
+  // ── PAN TO PIN (legend click) ─────────────────────────────────
+  function panToPin(key) {
+    initMap();
+    var p = pins[key]; if (!p) return;
+    mapObj.flyTo([p.lat, p.lng], 14, { animate:true, duration:0.9 });
+    setTimeout(function() { p.marker.openPopup(); }, 950);
+  }
+
+  // ── HIGHLIGHT PIN (calendar click) ───────────────────────────
+  function highlightPin(key) {
+    var el = event.currentTarget;
+    el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
+    var overviewBtn = document.getElementById('btn-overview');
+    showTab('overview', overviewBtn);
+    setTimeout(function() {
+      initMap();
+      var p = pins[key]; if (!p) return;
+      mapObj.flyTo([p.lat, p.lng], 14, { animate:true, duration:0.9 });
+      setTimeout(function() { p.marker.openPopup(); }, 950);
+    }, 100);
+  }
+
+  // ── CHECKLIST PERSISTENCE ─────────────────────────────────────
+  function initChecklists() {
+    document.querySelectorAll('.checklist-wrap input[type=checkbox]').forEach(function(cb) {
+      var key = 'chk_' + cb.id;
+      cb.checked = localStorage.getItem(key) === '1';
+      cb.parentElement.classList.toggle('checked', cb.checked);
+      cb.addEventListener('change', function() {
+        localStorage.setItem(key, cb.checked ? '1' : '0');
+        cb.parentElement.classList.toggle('checked', cb.checked);
+      });
+    });
+  }
+
+  // ── DURATION PILLS ────────────────────────────────────────────
+  function updateCalPills() {
+    var map = { bay:"Cook’s Bay·5N", cook:"Piha’ena·5N", fare:"Tiahura·5N" };
+    Object.keys(map).forEach(function(cls) {
+      document.querySelectorAll('.cal-ev.' + cls).forEach(function(el) {
+        if (el.textContent === "Cook’s Bay" || el.textContent === "Piha’ena BnB" || el.textContent === 'Tiahura')
+          el.textContent = map[cls];
+      });
+    });
+  }
+
+  // ── PWA / SERVICE WORKER ─────────────────────────────────────
+  function initPWA() {
+    if (!('serviceWorker' in navigator)) return;
+    // Tile-aware SW: cache-first for map tiles, stale-while-revalidate for app
+    var swCode = [
+      "const APP='moorea-app-v4';",
+      "const BUCKETS={'cartocdn.com':'moorea-carto','openstreetmap.org':'moorea-osm','arcgisonline.com':'moorea-arcgis','opentopomap.org':'moorea-topo','openstreetmap.fr':'moorea-hot','openseamap.org':'moorea-sea'};",
+      "const STATIC=['https://unpkg.com/leaflet@1.9.4/dist/leaflet.css','https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'];",
+      "self.addEventListener('install',e=>{e.waitUntil(caches.open(APP).then(c=>c.addAll(STATIC)));self.skipWaiting();});",
+      "self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==APP&&!Object.values(BUCKETS).includes(k)).map(k=>caches.delete(k)))));self.clients.claim();});",
+      "function tileBucket(url){const host=Object.keys(BUCKETS).find(h=>url.includes(h));return host?BUCKETS[host]:null;}",
+      "self.addEventListener('fetch',e=>{",
+      "  if(e.request.method!=='GET')return;",
+      "  const bucket=tileBucket(e.request.url);",
+      "  if(bucket){",
+      "    e.respondWith(caches.open(bucket).then(tc=>tc.match(e.request).then(cached=>{",
+      "      if(cached)return cached;",
+      "      return fetch(e.request).then(r=>{if(r&&r.status===200)tc.put(e.request,r.clone());return r;}).catch(()=>new Response('',{status:503}));",
+      "    })));",
+      "  } else {",
+      "    e.respondWith(caches.open(APP).then(ac=>ac.match(e.request).then(cached=>{",
+      "      const fresh=fetch(e.request).then(r=>{if(r&&r.status===200)ac.put(e.request,r.clone());return r;}).catch(()=>cached);",
+      "      return cached||fresh;",
+      "    })));",
+      "  }",
+      "});"
+    ].join('\n');
+    var blob = new Blob([swCode], { type: 'application/javascript' });
+    var url  = URL.createObjectURL(blob);
+    navigator.serviceWorker.register(url).then(function(reg) {
+      URL.revokeObjectURL(url);
+      if (caches) caches.open('moorea-app-v4').then(function(cache) { cache.add(location.href); }); setTimeout(updateCacheSize, 3000);
+    }).catch(function() {});
+  }
+
+  // ── OFFLINE TILE PRE-CACHE ────────────────────────────────────
+  function lon2tile(lon, z) { return Math.floor((lon + 180) / 360 * Math.pow(2, z)); }
+  function lat2tile(lat, z) { return Math.floor((1 - Math.log(Math.tan(lat * Math.PI / 180) + 1 / Math.cos(lat * Math.PI / 180)) / Math.PI) / 2 * Math.pow(2, z)); }
+
+  function preCacheMoorea() {
+    if (!('caches' in window)) return;
+    // Moorea bounding box
+    var bounds = { minLat: -17.65, maxLat: -17.40, minLon: -150.05, maxLon: -149.65 };
+    // Include current map zoom level (up to 14) plus lower levels
+    var maxZ = 14;
+    var zoomLevels = [];
+    for (var z = 1; z <= maxZ; z++) zoomLevels.push(z);
+    var tileUrls = [];
+    // Per-bucket provider definitions
+    var providerBuckets = [
+      { url: 'https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',                              bucket: 'moorea-carto'   },
+      { url: 'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',                                         bucket: 'moorea-carto'   },
+      { url: 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',                                                 bucket: 'moorea-osm'     },
+      { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',    bucket: 'moorea-arcgis'  },
+      { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/{z}/{y}/{x}',bucket: 'moorea-arcgis' },
+      { url: 'https://a.tile.opentopomap.org/{z}/{x}/{y}.png',                                                   bucket: 'moorea-topo'    },
+      { url: 'https://tile-a.openstreetmap.fr/hot/{z}/{x}/{y}.png',                                              bucket: 'moorea-hot'     },
+    ];
+    // Build per-bucket tile lists
+    var bucketMap = {}; // bucket -> [urls]
+    zoomLevels.forEach(function(z) {
+      var x0 = lon2tile(bounds.minLon, z), x1 = lon2tile(bounds.maxLon, z);
+      var y0 = lat2tile(bounds.maxLat, z), y1 = lat2tile(bounds.minLat, z);
+      for (var x = x0; x <= x1; x++) {
+        for (var y = y0; y <= y1; y++) {
+          providerBuckets.forEach(function(pb) {
+            var url = pb.url.replace(/{z}/g,z).replace(/{x}/g,x).replace(/{y}/g,y);
+            tileUrls.push(url);
+            if (!bucketMap[pb.bucket]) bucketMap[pb.bucket] = [];
+            bucketMap[pb.bucket].push(url);
+          });
+        }
+      }
+    });
+    var cached = 0, total = tileUrls.length;
+    // Cache each bucket separately
+    var bucketNames = Object.keys(bucketMap);
+    function cacheBucket(bidx) {
+      if (bidx >= bucketNames.length) {
+        updateCacheSize();
+        return;
+      }
+      var bname = bucketNames[bidx], burls = bucketMap[bname];
+      caches.open(bname).then(function(cache) {
+        var batches = [];
+        for (var i = 0; i < burls.length; i += 20) batches.push(burls.slice(i, i + 20));
+        function runBatch(idx) {
+          if (idx >= batches.length) {
+            cacheBucket(bidx + 1);
+            var badge = document.getElementById("cache-badge");
+            if (badge) { badge.style.display="block"; badge.textContent="✓ Cached for Offline"; badge.style.animation="fadeInOut 4s ease forwards"; setTimeout(function(){ badge.style.display="none"; }, 4500); }
+            return;
+          }
+          Promise.all(batches[idx].map(function(url) {
+            return cache.match(url).then(function(hit) {
+              if (hit) { cached++; return; }
+              return fetch(url).then(function(r) {
+                if (r && r.status === 200) { cache.put(url, r); cached++; }
+              }).catch(function(){});
+            });
+          })).then(function() {
+            runBatch(idx + 1);
+          });
+        }
+        runBatch(0);
+      });
+    }
+    cacheBucket(0);
+  }
+
+  // ── LOCAL NETWORK IP DISPLAY ─────────────────────────────────
+  var _localIP = null;
+  function detectLocalIP() {
+    // Only show badge when served over http (not file://)
+    if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
+    var badge = document.getElementById('local-ip-badge');
+    if (!badge) return;
+    var port = location.port || (location.protocol === 'https:' ? '443' : '80');
+    var ip = location.hostname;
+    // If already a LAN IP, use it directly
+    if (/^192\.168\.|^10\.|^172\.(1[6-9]|2\d|3[01])\./.test(ip)) {
+      _localIP = ip;
+      badge.textContent = '📶 ' + ip + ':' + port;
+      badge.style.display = '';
+      return;
+    }
+    // Try WebRTC STUN to find LAN IP
+    try {
+      var pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+      pc.createDataChannel('');
+      pc.createOffer().then(function(offer) { return pc.setLocalDescription(offer); });
+      pc.onicecandidate = function(e) {
+        if (!e || !e.candidate) return;
+        var m = e.candidate.candidate.match(/(\d{1,3}(?:\.\d{1,3}){3})/);
+        if (m && /^192\.168\.|^10\.|^172\.(1[6-9]|2\d|3[01])\./.test(m[1])) {
+          _localIP = m[1];
+          badge.textContent = '📶 ' + m[1] + ':' + port;
+          badge.style.display = '';
+          pc.close();
+        }
+      };
+    } catch(e) {}
+  }
+  function copyLocalURL() {
+    var badge = document.getElementById('local-ip-badge');
+    if (!_localIP) return;
+    var port = location.port || '8080';
+    var url = 'http://' + _localIP + ':' + port + '/itinerary.html';
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(url).then(function() {
+        var orig = badge.textContent; badge.textContent = '✅ Copied!';
+        setTimeout(function(){ badge.textContent = orig; }, 1500);
+      });
+    }
+  }
+
+  // ── INIT ──────────────────────────────────────────────────────
+  window.addEventListener('load', function() {
+    try {
+    var savedDark = localStorage.getItem('dark');
+    var prefersDark = savedDark === null && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (savedDark === '1' || prefersDark) {
+      document.body.classList.add('dark');
+      document.getElementById('darkBtn').textContent = '☀ Light';
+    }
+    if (savedDark === null && window.matchMedia) window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+      if (localStorage.getItem('dark') !== null) return;
+      document.body.classList.toggle('dark', e.matches);
+      document.getElementById('darkBtn').textContent = e.matches ? '☀ Light' : '🌙 Dark';
+    });
+    var hash = location.hash.slice(1);
+    if (hash && document.getElementById('pane-' + hash)) {
+      var btn = document.getElementById('btn-' + hash);
+      if (btn) showTab(hash, btn);
+    }
+    updateCountdown();
+    markCurrentStay();
+    initWeekToggles();
+    initChecklists();
+    updateCalPills();
+    initScrollAnimations();
+    initKeyboard();
+    initSwipe();
+    initBeenThere();
+    initRefCopy();
+    initTelLinks();
+    initCalPinchSwipe();
+    fetchExchangeRates();
+    setInterval(fetchExchangeRates, 1800000);
+    restoreBudgetFromStorage(); setTimeout(calcFoodEst, 500); setDistUnits(_useMiles); var ut=document.getElementById("units-toggle"); if(ut) ut.checked=_useMiles;
+    initShake();
+    setTimeout(updateCacheSize, 5000);
+    setInterval(updateCacheSize, 120000);
+    // Pre-cache all Moorea tiles on load (skips already-cached); retry when back online
+    if (navigator.onLine) setTimeout(preCacheMoorea, 6000);
+    window.addEventListener('online', function() { setTimeout(preCacheMoorea, 2000); });
+    initPWA();
+    detectLocalIP();
+    initPullToRefreshWeather();
+    // PWA install banner — show once on mobile if not dismissed and not already in standalone
+    if (!localStorage.getItem('pwa-dismissed') && !window.navigator.standalone && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+      setTimeout(function() {
+        var banner = document.getElementById('pwa-banner');
+        if (banner) banner.classList.remove('hidden');
+      }, 3000);
+    }
+    // font-display: swap equivalent for any dynamically loaded fonts
+    var styleEl = document.createElement('style');
+    styleEl.textContent = '@font-face { font-display: swap; }';
+    document.head.appendChild(styleEl);
+    setTimeout(function() {
+      initMap();
+      if (mapObj) mapObj.invalidateSize();
+    }, 150);
+    } catch(initErr) { console.error('Init error:', initErr); setTimeout(function(){ initMap(); }, 300); }
+  });
+</script>
+
+</body>
+</html>
