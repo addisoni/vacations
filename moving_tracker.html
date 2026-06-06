@@ -402,6 +402,7 @@
 
 <button id="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark mode" onclick="toggleTheme()">☀️</button>
 
+<div id="local-ip-badge" style="display:none;position:fixed;top:0.85rem;left:1rem;z-index:1100;background:rgba(30,41,59,0.92);color:#e2e8f0;font-size:0.7rem;font-weight:600;padding:0.25rem 0.6rem;border-radius:20px;backdrop-filter:blur(4px);letter-spacing:0.02em;cursor:pointer;" title="Tap to share URL on local network" onclick="copyLocalURL()"></div>
 <button id="back-to-top" aria-label="Back to top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
 
 <!-- ═══════════════════════ HEADER ═══════════════════════ -->
@@ -3152,6 +3153,73 @@ initSparklines();
 renderCompare();
 initTrend();
 runCalc();
+
+
+  // ── LOCAL NETWORK IP DISPLAY ──────────────────────────────
+  var _localIP = null;
+  function detectLocalIP() {
+    if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
+    var badge = document.getElementById('local-ip-badge');
+    if (!badge) return;
+    var port = location.port || (location.protocol === 'https:' ? '443' : '80');
+    var ip = location.hostname;
+    if (/^192\.168\.|^10\.|^172\.(1[6-9]|2\d|3[01])\./.test(ip)) {
+      _localIP = ip; badge.textContent = '📶 ' + ip + ':' + port; badge.style.display = ''; return;
+    }
+    try {
+      var pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+      pc.createDataChannel('');
+      pc.createOffer().then(function(o){ return pc.setLocalDescription(o); });
+      pc.onicecandidate = function(e) {
+        if (!e || !e.candidate) return;
+        var m = e.candidate.candidate.match(/(\d{1,3}(?:\.\d{1,3}){3})/);
+        if (m && /^192\.168\.|^10\.|^172\.(1[6-9]|2\d|3[01])\./.test(m[1])) {
+          _localIP = m[1]; badge.textContent = '📶 ' + m[1] + ':' + port;
+          badge.style.display = ''; pc.close();
+        }
+      };
+    } catch(e) {}
+  }
+  function _localURL() {
+    var port = location.port || '8080';
+    return 'http://' + _localIP + ':' + port + '/moving_tracker.html';
+  }
+  function copyLocalURL() { if (_localIP) showQRModal(); }
+  function showQRModal() {
+    if (!_localIP) return;
+    var url = _localURL();
+    var existing = document.getElementById('qr-modal-tracker');
+    if (existing) { existing.remove(); return; }
+    var overlay = document.createElement('div');
+    overlay.id = 'qr-modal-tracker';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;';
+    overlay.onclick = function(e){ if(e.target===overlay) overlay.remove(); };
+    var box = document.createElement('div');
+    box.style.cssText = 'background:#1a1d27;border-radius:16px;padding:1.25rem;max-width:280px;width:100%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.5);border:1px solid #2e3350;color:#e2e8f0;';
+    var title = document.createElement('p');
+    title.style.cssText = 'font-weight:700;font-size:0.85rem;color:#a5b4fc;margin-bottom:0.75rem;';
+    title.textContent = '📶 Share to device on same WiFi';
+    var img = document.createElement('img');
+    img.src = 'https://api.qrserver.com/v1/create-qr-code/?data=' + encodeURIComponent(url) + '&size=180x180&bgcolor=1a1d27&color=a5b4fc&margin=10';
+    img.style.cssText = 'width:180px;height:180px;border-radius:8px;display:block;margin:0 auto 0.75rem;';
+    img.alt = 'QR code';
+    var urlEl = document.createElement('p');
+    urlEl.style.cssText = 'font-size:0.72rem;color:#8892aa;word-break:break-all;margin-bottom:0.75rem;font-family:monospace;';
+    urlEl.textContent = url;
+    var copyBtn = document.createElement('button');
+    copyBtn.textContent = '📋 Copy URL';
+    copyBtn.style.cssText = 'background:#6C63FF;color:#fff;border:none;border-radius:8px;padding:0.4rem 1rem;font-size:0.8rem;font-weight:700;cursor:pointer;margin-right:0.5rem;';
+    copyBtn.onclick = function(){
+      if(navigator.clipboard) navigator.clipboard.writeText(url).then(function(){ copyBtn.textContent='✅ Copied!'; setTimeout(function(){ copyBtn.textContent='📋 Copy URL'; },1500); });
+    };
+    var closeBtn = document.createElement('button');
+    closeBtn.textContent = 'Close';
+    closeBtn.style.cssText = 'background:#22263a;color:#e2e8f0;border:1px solid #2e3350;border-radius:8px;padding:0.4rem 0.8rem;font-size:0.8rem;cursor:pointer;';
+    closeBtn.onclick = function(){ overlay.remove(); };
+    box.appendChild(title); box.appendChild(img); box.appendChild(urlEl); box.appendChild(copyBtn); box.appendChild(closeBtn);
+    overlay.appendChild(box); document.body.appendChild(overlay);
+  }
+  window.addEventListener('load', function(){ detectLocalIP(); });
 
 </script>
 </body>

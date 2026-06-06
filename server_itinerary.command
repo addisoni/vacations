@@ -1,5 +1,5 @@
 #!/bin/bash
-# Double-click this file in Finder to host the itinerary on your local network.
+# Double-click this file in Finder to host all planners on your local network.
 # Your iPhone/iPad must be on the same WiFi network.
 
 PORT=8080
@@ -10,14 +10,15 @@ IP=$(ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null ||
 
 echo ""
 echo "================================================"
-echo "  Moorea Itinerary — Local Network Server"
+echo "  Addison's Planner — Local Network Server"
 echo "================================================"
 echo ""
-echo "  Open this on your iPhone/iPad:"
+echo "  Open on your iPhone/iPad (same WiFi):"
 echo ""
-echo "    http://$IP:$PORT/moorea.html"
+echo "  🏠 Home:          http://$IP:$PORT/index.html"
+echo "  🌺 Moorea Trip:   http://$IP:$PORT/moorea.html"
+echo "  🏔️  Seattle Guide: http://$IP:$PORT/moving_tracker.html"
 echo ""
-echo "  Make sure your iPhone is on the same WiFi."
 echo "  Press Ctrl+C to stop the server."
 echo ""
 echo "================================================"
