@@ -129,6 +129,14 @@
     .card-seattle .card-arrow { color: #818cf8; }
     .card-seattle:hover { box-shadow: 0 20px 60px rgba(99,102,241,.2); }
 
+    /* Moving comparison card */
+    .card-moving { background: #1a1206; border-color: #4a3410; }
+    .card-moving .card-hero { background: linear-gradient(135deg, #78350f, #b45309); }
+    .card-moving h2 { color: #fcd34d; }
+    .card-moving .subtitle { color: #f59e0b; }
+    .card-moving .card-arrow { color: #f59e0b; }
+    .card-moving:hover { box-shadow: 0 20px 60px rgba(245,158,11,.2); }
+
     footer {
       margin-top: 3rem;
       color: #334155;
@@ -182,13 +190,25 @@
       </div>
     </a>
 
+    <a class="card card-moving" href="moving_company_comparison.html">
+      <div class="card-hero">
+        <span class="card-emoji">📦</span>
+      </div>
+      <div class="card-body">
+        <div class="subtitle">Cost Comparison · Packrat vs PODS</div>
+        <h2>Moving Company Comparison</h2>
+        <p>Interactive calculator comparing Packrat and PODS quotes — adjust storage duration and see totals update live.</p>
+        <span class="card-arrow">Open comparison</span>
+      </div>
+    </a>
+
   </div>
 
   <footer>Personal use only</footer>
 
 <script>
   function downloadServerScript() {
-    var script = '#!/bin/bash\n# Double-click in Finder to host all planners on your local network.\nPORT=8080\nDIR=\"$(cd \"$(dirname \"$0\")\" && pwd)\"\nIP=$(ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null || echo \"unknown\")\necho \"\"\necho \"================================================\"\necho \"  Addison\'s Planner — Local Network Server\"\necho \"================================================\"\necho \"\"\necho \"  Open on your iPhone/iPad (same WiFi):\"\necho \"\"\necho \"  Home:          http://$IP:$PORT/index.html\"\necho \"  Moorea Trip:   http://$IP:$PORT/moorea.html\"\necho \"  Seattle Guide: http://$IP:$PORT/moving_tracker.html\"\necho \"\"\necho \"  Press Ctrl+C to stop.\"\ \necho \"\"\ncd \"$DIR\"\npython3 -m http.server $PORT\n';
+    var script = '#!/bin/bash\n# Double-click in Finder to host all planners on your local network.\nPORT=8080\nDIR=\"$(cd \"$(dirname \"$0\")\" && pwd)\"\nIP=$(ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null || echo \"unknown\")\necho \"\"\necho \"================================================\"\necho \"  Addison\'s Planner — Local Network Server\"\necho \"================================================\"\necho \"\"\necho \"  Open on your iPhone/iPad (same WiFi):\"\necho \"\"\necho \"  Home:          http://$IP:$PORT/index.html\"\necho \"  Moorea Trip:   http://$IP:$PORT/moorea.html\"\necho \"  Seattle Guide: http://$IP:$PORT/moving_tracker.html\"\necho \"  Moving Compare:http://$IP:$PORT/moving_company_comparison.html\"\necho \"\"\necho \"  Press Ctrl+C to stop.\"\ \necho \"\"\ncd \"$DIR\"\npython3 -m http.server $PORT\n';
     var blob = new Blob([script], {type: 'application/octet-stream'});
     var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
     a.download = 'server_itinerary.command'; a.click(); URL.revokeObjectURL(a.href);

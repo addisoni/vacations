@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Moving Company Cost Comparison — Packrat vs PODS</title>
+<style>
+  :root {
+    --packrat: #1f6feb;
+    --pods: #d97706;
+    --bg: #f7f8fa;
+    --card: #ffffff;
+    --border: #e2e5ea;
+    --text: #1c1f26;
+    --muted: #5b6270;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 32px 24px 64px;
+  }
+  h1 { text-align: center; margin-bottom: 4px; font-size: 28px; }
+  .subtitle { text-align: center; color: var(--muted); margin-bottom: 32px; }
+  .wrap { max-width: 1080px; margin: 0 auto; }
+
+  .controls {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 28px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .controls h2 { margin-top: 0; font-size: 16px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+  .control-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px 28px;
+  }
+  .control {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .control label { font-size: 13px; font-weight: 600; }
+  .control small { color: var(--muted); font-size: 11.5px; }
+  .control input[type="number"] {
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    width: 100%;
+  }
+  .control.checkbox { flex-direction: row; align-items: center; gap: 8px; }
+  .control.checkbox label { font-weight: 500; }
+
+  .cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 28px;
+  }
+  @media (max-width: 760px) { .cards { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .card-header {
+    padding: 16px 20px;
+    font-size: 18px;
+    font-weight: 700;
+    color: white;
+  }
+  .card.packrat .card-header { background: var(--packrat); }
+  .card.pods .card-header { background: var(--pods); }
+
+  .section-title {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    padding: 14px 20px 4px;
+    font-weight: 700;
+  }
+  table.line-items { width: 100%; border-collapse: collapse; font-size: 14px; }
+  table.line-items td { padding: 6px 20px; border-bottom: 1px solid #f0f1f3; }
+  table.line-items td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+  table.line-items tr.total td { font-weight: 700; border-top: 1px solid var(--border); border-bottom: none; }
+  table.line-items tr.discount td { color: #15803d; }
+
+  .grand-total {
+    padding: 18px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    background: #fafbfc;
+    border-top: 2px solid var(--border);
+  }
+  .grand-total .label { font-size: 14px; color: var(--muted); font-weight: 600; }
+  .grand-total .value { font-size: 26px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .card.packrat .grand-total .value { color: var(--packrat); }
+  .card.pods .grand-total .value { color: var(--pods); }
+
+  .summary {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .summary h2 { margin-top: 0; font-size: 16px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+  .bar-row { margin-bottom: 14px; }
+  .bar-row .bar-label { display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .bar-track { background: #eef0f3; border-radius: 6px; height: 22px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 6px; transition: width 0.25s ease; display: flex; align-items: center; }
+  .bar-fill.packrat { background: var(--packrat); }
+  .bar-fill.pods { background: var(--pods); }
+
+  .verdict {
+    margin-top: 16px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    font-size: 15px;
+  }
+  .verdict strong { color: #15803d; }
+
+  .note {
+    margin-top: 22px;
+    font-size: 12.5px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .note ul { margin: 6px 0 0 18px; padding: 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Packrat vs PODS — Cost Comparison</h1>
+  <p class="subtitle">Adjust the assumptions below — totals recalculate live.</p>
+
+  <div class="controls">
+    <h2>Assumptions</h2>
+    <div class="control-grid">
+      <div class="control">
+        <label for="destMonths">Packrat — total months stored at destination</label>
+        <input type="number" id="destMonths" value="1" min="1" step="1">
+        <small>First 30 days free, then $446.25/mo</small>
+      </div>
+      <div class="control">
+        <label for="podsMonths">PODS — total months of rental</label>
+        <input type="number" id="podsMonths" value="1" min="1" step="1">
+        <small>Delivery + first 30 days storage always charged upfront ($353.65); $327.20/mo after</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="cards">
+    <div class="card packrat">
+      <div class="card-header">Packrat</div>
+
+      <div class="section-title">Monthly Rental — Destination (total months: <span id="destMonthsLabel">1</span>, billed months: <span id="destBilledLabel">0</span>)</div>
+      <table class="line-items">
+        <tr><td>Monthly Container Rent</td><td>$259.00</td></tr>
+        <tr><td>Protection Plan</td><td>$131.95</td></tr>
+        <tr><td>Personal Property Recovery Fee</td><td>$9.60</td></tr>
+        <tr><td>Regulatory License Fee</td><td>$9.50</td></tr>
+        <tr><td>Admin Fee</td><td>$9.78</td></tr>
+        <tr><td>Tax</td><td>$26.42</td></tr>
+        <tr class="total"><td>Total / billed month</td><td>$446.25</td></tr>
+        <tr class="discount"><td>First 30 days</td><td>Free</td></tr>
+      </table>
+
+      <div class="section-title">Estimated Transportation (one-time)</div>
+      <table class="line-items">
+        <tr><td>Transportation Charges</td><td>$2,286.45</td></tr>
+        <tr><td>Deluxe Lock</td><td>$15.01</td></tr>
+        <tr><td>Tax</td><td>$1.54</td></tr>
+        <tr class="total"><td>Total</td><td>$2,303.00</td></tr>
+      </table>
+
+      <div class="section-title">Optional Services (included, no charge)</div>
+      <table class="line-items">
+        <tr><td>Movers at Origin (value $603.69)</td><td>Free</td></tr>
+      </table>
+
+      <div class="grand-total">
+        <span class="label">Estimated Grand Total</span>
+        <span class="value" id="packratTotal">$0.00</span>
+      </div>
+    </div>
+
+    <div class="card pods">
+      <div class="card-header">PODS</div>
+
+      <div class="section-title">Delivery, Protection &amp; First 30 Days Storage (one-time, always charged)</div>
+      <table class="line-items">
+        <tr><td>Container Only</td><td>$10.00</td></tr>
+        <tr><td>Disc Lock Max Security (Stainless 2.75 / 70mm, incl. tax)</td><td>$16.45</td></tr>
+        <tr><td>First 30 Days Storage (list price)</td><td>$409.00</td></tr>
+        <tr class="discount"><td>Discount (20% off — requires 2+ months storage)</td><td id="podsFirstDiscount">&minus;$81.80</td></tr>
+        <tr class="total"><td>Total</td><td id="podsFirstTotal">$353.65</td></tr>
+      </table>
+
+      <div class="section-title">Additional Months of Rental (billed months after first: <span id="podsBilledLabel">0</span>)</div>
+      <table class="line-items">
+        <tr><td>Rate per additional month (list price)</td><td>$409.00</td></tr>
+        <tr class="discount"><td>Discount (20% off)</td><td>&minus;$81.80</td></tr>
+        <tr><td>Discounted rate per additional month</td><td>$327.20</td></tr>
+        <tr class="total"><td>Subtotal</td><td id="podsAdditionalSubtotal">$0.00</td></tr>
+      </table>
+
+      <div class="section-title">Transportation (one-time)</div>
+      <table class="line-items">
+        <tr><td>Fuel Surcharge for Long Distance Transportation</td><td>$122.55</td></tr>
+        <tr><td>Long Distance Transit (list price)</td><td>$2,436.20</td></tr>
+        <tr class="discount"><td>Discount</td><td>&minus;$487.24</td></tr>
+        <tr><td>Est. Tax</td><td>$0.00</td></tr>
+        <tr class="total"><td>Total</td><td>$2,071.51</td></tr>
+      </table>
+
+      <div class="grand-total">
+        <span class="label">Estimated Grand Total</span>
+        <span class="value" id="podsTotal">$0.00</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="summary">
+    <h2>Side-by-side</h2>
+    <div class="bar-row">
+      <div class="bar-label"><span>Packrat</span><span id="packratBarLabel">$0.00</span></div>
+      <div class="bar-track"><div class="bar-fill packrat" id="packratBar" style="width:0%"></div></div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label"><span>PODS</span><span id="podsBarLabel">$0.00</span></div>
+      <div class="bar-track"><div class="bar-fill pods" id="podsBar" style="width:0%"></div></div>
+    </div>
+    <div class="verdict" id="verdict"></div>
+
+    <div class="note">
+      Notes &amp; assumptions:
+      <ul>
+        <li>Origin storage is excluded — this comparison assumes the container is only stored at the destination (e.g. loaded, transported, and held before delivery), not rented at origin first.</li>
+        <li>Packrat waives the first 30 days of destination storage, so only months beyond the first are billed at $446.25/mo.</li>
+        <li>PODS does not waive its first month — delivery, the lock, and the first 30 days of storage are billed upfront as one fixed charge, whether or not the full 30 days is actually used.</li>
+        <li>PODS' 20%-off monthly rate ($409.00 → $327.20) only applies when total storage is 2 months or longer. At exactly 1 month, no discount applies and the first-month charge uses the full $409.00 list price ($435.45 total instead of $353.65). Once storage reaches 2+ months, the discount applies to the first month and every additional month.</li>
+        <li>Packrat's destination monthly total already includes tax, per the quote. Transportation is a flat one-time estimate, applied once regardless of storage duration.</li>
+        <li>Packrat includes optional movers at origin at no charge — a $603.69 value, shown as included rather than added to the total.</li>
+        <li>PODS transportation (fuel surcharge + long-distance transit) is a one-time charge, applied once regardless of storage duration; this discount isn't tied to the storage-duration condition above.</li>
+        <li>Figures are estimates from the quotes provided and may not include every possible fee (e.g. insurance tiers, extra mileage, warehouse storage instead of at-residence).</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+  const destInput = document.getElementById('destMonths');
+  const podsInput = document.getElementById('podsMonths');
+
+  const PACKRAT_DEST_MONTHLY = 446.25;
+  const PACKRAT_TRANSPORT = 2303.00;
+  const PACKRAT_MOVERS_VALUE = 603.69;
+
+  const PODS_CONTAINER = 10.00;
+  const PODS_LOCK = 16.45;
+  const PODS_MONTHLY_LIST = 409.00; // list price per month
+  const PODS_MONTHLY_DISCOUNT_AMT = 81.80; // 20% off, only applies at 2+ months storage
+  const PODS_MONTHLY_DISCOUNTED = 327.20; // list price minus 20% discount
+  const PODS_TRANSPORT = 2071.51;
+
+  function fmt(n) {
+    return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  function fmtNeg(n) {
+    return n > 0 ? '−' + fmt(n) : fmt(0);
+  }
+
+  function recalc() {
+    const destMonths = Math.max(1, parseFloat(destInput.value) || 1);
+    const podsMonths = Math.max(1, parseFloat(podsInput.value) || 1);
+
+    // Packrat waives the first 30 days; PODS bills its first month upfront (no free month).
+    const destBilled = Math.max(0, destMonths - 1);
+    const podsAdditional = Math.max(0, podsMonths - 1);
+    const podsDiscountApplies = podsMonths >= 2;
+
+    document.getElementById('destMonthsLabel').textContent = destMonths;
+    document.getElementById('destBilledLabel').textContent = destBilled;
+    document.getElementById('podsBilledLabel').textContent = podsAdditional;
+
+    const packratTotal = (destBilled * PACKRAT_DEST_MONTHLY) + PACKRAT_TRANSPORT;
+
+    const podsFirstMonthRate = podsDiscountApplies ? PODS_MONTHLY_DISCOUNTED : PODS_MONTHLY_LIST;
+    const podsFirstDiscountAmt = podsDiscountApplies ? PODS_MONTHLY_DISCOUNT_AMT : 0;
+    const podsFirstTotal = PODS_CONTAINER + PODS_LOCK + podsFirstMonthRate;
+    document.getElementById('podsFirstDiscount').textContent = fmtNeg(podsFirstDiscountAmt);
+    document.getElementById('podsFirstTotal').textContent = fmt(podsFirstTotal);
+
+    // Additional months only exist when total storage is 2+ months, so the discount always applies to them.
+    const podsAdditionalSubtotal = podsAdditional * PODS_MONTHLY_DISCOUNTED;
+    document.getElementById('podsAdditionalSubtotal').textContent = fmt(podsAdditionalSubtotal);
+
+    const podsRental = podsFirstTotal + podsAdditionalSubtotal;
+    const podsTotal = podsRental + PODS_TRANSPORT;
+
+    document.getElementById('packratTotal').textContent = fmt(packratTotal);
+    document.getElementById('podsTotal').textContent = fmt(podsTotal);
+
+    const max = Math.max(packratTotal, podsTotal, 1);
+    document.getElementById('packratBar').style.width = (packratTotal / max * 100) + '%';
+    document.getElementById('podsBar').style.width = (podsTotal / max * 100) + '%';
+    document.getElementById('packratBarLabel').textContent = fmt(packratTotal);
+    document.getElementById('podsBarLabel').textContent = fmt(podsTotal);
+
+    const verdict = document.getElementById('verdict');
+    const diff = Math.abs(packratTotal - podsTotal);
+    let verdictHtml;
+    if (packratTotal < podsTotal) {
+      verdictHtml = `<strong>Packrat is cheaper</strong> by ${fmt(diff)} under these assumptions.`;
+    } else if (podsTotal < packratTotal) {
+      verdictHtml = `<strong>PODS is cheaper</strong> by ${fmt(diff)} under these assumptions.`;
+    } else {
+      verdictHtml = `Both options cost the same under these assumptions.`;
+    }
+    verdictHtml += ` (Packrat also throws in free origin movers, a $${PACKRAT_MOVERS_VALUE.toFixed(2)} value, not reflected in the price.)`;
+    verdict.innerHTML = verdictHtml;
+  }
+
+  [destInput, podsInput].forEach(el => {
+    el.addEventListener('input', recalc);
+  });
+
+  recalc();
+</script>
+</body>
+</html>
