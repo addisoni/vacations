@@ -6,7 +6,7 @@
 <style>
   :root {
     --packrat: #1f6feb;
-    --pods: #d97706;
+    --pods: #dc2626;
     --bg: #f7f8fa;
     --card: #ffffff;
     --border: #e2e5ea;
@@ -79,6 +79,13 @@
   }
   .card.packrat .card-header { background: var(--packrat); }
   .card.pods .card-header { background: var(--pods); }
+
+  .card-photo {
+    display: block;
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+  }
 
   .section-title {
     font-size: 12px;
@@ -165,6 +172,7 @@
   <div class="cards">
     <div class="card packrat">
       <div class="card-header">Packrat</div>
+      <img class="card-photo" src="packrat_photo.webp" alt="1-800-PACK-RAT moving and storage container placed in a residential driveway">
 
       <div class="section-title">Monthly Rental — Destination (total months: <span id="destMonthsLabel">1</span>, billed months: <span id="destBilledLabel">0</span>)</div>
       <table class="line-items">
@@ -199,6 +207,7 @@
 
     <div class="card pods">
       <div class="card-header">PODS</div>
+      <img class="card-photo" src="pods_photo.jpg" alt="PODS moving container being loaded onto a truck at a residential driveway">
 
       <div class="section-title">Delivery, Protection &amp; First 30 Days Storage (one-time, always charged)</div>
       <table class="line-items">
