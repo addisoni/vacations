@@ -60,7 +60,7 @@
 <li><strong>Qualifying threshold:</strong> at least one gas-only turbo trim priced under $50k somewhere in the lineup. No supercharged SUV meets these criteria in this market/window &mdash; every entry below is turbocharged.</li>
 <li><strong>Used Market Range:</strong> either KBB's "Fair Purchase Price" (national-average used-dealer transaction estimate) or a small sample of individual cars.com listings where KBB data wasn't available &mdash; the latter is a narrow local snapshot, not a market average, so treat those figures as rough indicators only.</li>
 <li><strong>Horsepower/Torque:</strong> dual figures (regular 87 octane vs. premium 93 octane) are shown only where the manufacturer officially publishes both &mdash; a documented Mazda SkyActiv-Turbo trait (CX-50, CX-30, CX-5), not found elsewhere in this list. Other engines that merely <em>recommend</em> premium without a separate reduced-fuel rating show a single official figure.</li>
-<li><strong>HP/Weight (lb per hp):</strong> curb weight &divide; horsepower, lower = more power-dense; sourced trim-by-trim (mostly via Car and Driver/MotorTrend/cars.com specs) and cited inline. A few rows are genuinely unresolved after extensive research and are marked "not found this session" rather than guessed &mdash; notably Kia Seltos SX AWD, Mazda CX-5 Turbo, and Cadillac XT4. A few others use a closest-available substitute because the row's exact trim/engine/drivetrain combination doesn't actually exist in that model year (flagged inline as "trim substitute" or "trim mismatch").</li>
+<li><strong>HP/Weight (lb per hp):</strong> curb weight &divide; horsepower, lower = more power-dense; sourced trim-by-trim (mostly via Car and Driver/MotorTrend/cars.com specs) and cited inline. Every row is now filled in &mdash; where a published ratio wasn't directly available, the figure was manually calculated from a trim-matched curb weight and horsepower (both cited inline, marked "manually calculated"). A few others use a closest-available substitute because the row's exact trim/engine/drivetrain combination doesn't actually exist in that model year (flagged inline as "trim substitute" or "trim mismatch").</li>
 <li><strong>Safety Ratings:</strong> IIHS award / NHTSA star citations sourced via Wikipedia (IIHS.org and NHTSA.gov aren't reachable from this research environment). Wikipedia's safety sections are often several redesigns out of date, so every citation is labeled with the model year/generation it actually refers to, and flagged when that generation does <em>not</em> match the current MY2023&ndash;2026 vehicle in the row.</li>
 <li><strong>Warranty</strong> is shown at the brand level (basic/bumper-to-bumper &middot; powertrain), since terms are set by the manufacturer rather than varying by trim.</li>
 </ul>
@@ -88,6 +88,7 @@
   </span>
   <label><input type="checkbox" id="toggle-edge"> Hide edge-case rows</label>
   <label><input type="checkbox" id="toggle-uncertain"> Hide uncertain rows</label>
+  <label><input type="checkbox" id="toggle-discontinued"> Hide discontinued rows</label>
   <button type="button" id="reset-filters">Reset</button>
   <span id="filter-count"></span>
 </div>
@@ -155,7 +156,7 @@
   <td>2.5L turbo I4</td>
   <td class="spec">227 (87 oct) / 256 (93 oct)</td>
   <td class="spec">310 (87 oct) / 320 (93 oct)</td>
-  <td class="spec">not found this session</td>
+  <td class="spec">15.3 lb/hp <span class="note">(3,915 lbs curb weight &divide; 256hp @93 oct; 17.2 lb/hp using 227hp @87 oct; 2025&ndash;2026 Turbo Premium Plus AWD, cars.com &mdash; manually calculated, no directly-published ratio found)</span></td>
   <td>6-speed automatic</td>
   <td>AWD standard</td>
   <td class="price">$31,395 – $44,395</td>
@@ -179,7 +180,7 @@
   <td>1.5L turbo I4</td>
   <td class="spec">190</td>
   <td class="spec">179</td>
-  <td class="spec">not found this session</td>
+  <td class="spec">19.1 lb/hp <span class="note">(3,635 lbs curb weight, EX-L AWD 190hp, cars.com &mdash; consistent MY2023&ndash;2026 &mdash; manually calculated)</span></td>
   <td>CVT</td>
   <td>FWD or AWD</td>
   <td class="price">$32,370 – $38,350</td>
@@ -203,7 +204,7 @@
   <td>1.5L VC-Turbo I3</td>
   <td class="spec">201</td>
   <td class="spec">225</td>
-  <td class="spec">not found this session</td>
+  <td class="spec">18.4 lb/hp <span class="note">(3,694 lbs curb weight, SL AWD 201hp, MY2025, cars.com; Rock Creek AWD is 18.5 lb/hp at 3,713 lbs &mdash; manually calculated)</span></td>
   <td>CVT</td>
   <td>FWD or AWD (Rock Creek AWD-only)</td>
   <td class="price">$31,035 – $40,935</td>
@@ -227,7 +228,7 @@
   <td>1.5L turbo I4</td>
   <td class="spec">175</td>
   <td class="spec">203</td>
-  <td class="spec">not found this session</td>
+  <td class="spec">20.6 lb/hp <span class="note">(3,607 lbs curb weight, ACTIV AWD 175hp, MY2025&ndash;2026, cars.com; RS AWD is 20.7 lb/hp at 3,629 lbs &mdash; manually calculated)</span></td>
   <td>CVT (FWD) / 8-speed auto (AWD)</td>
   <td>FWD or AWD</td>
   <td class="price">$34,395 – $36,395</td>
@@ -275,7 +276,7 @@
   <td>1.5L turbo-3 / 2.0L turbo-4</td>
   <td class="spec">181–250</td>
   <td class="spec">190–280</td>
-  <td class="spec">not found this session</td>
+  <td class="spec">14.7 lb/hp <span class="note">(3,686 lbs curb weight, 2.0T AWD (ST-Line/Platinum) 250hp, MY2025, cars.com, cross-checked ~3,697 lbs via Car and Driver; a MY2026 cars.com figure of 3,922 lbs looks like a data error and was not used &mdash; manually calculated)</span></td>
   <td>8-speed automatic</td>
   <td>FWD or AWD</td>
   <td class="price">$30,350 – $38,935 <span class="note">(+$1,495 dest.)</span></td>
@@ -323,7 +324,7 @@
   <td>2.0L turbo I4</td>
   <td class="spec">200</td>
   <td class="spec">221</td>
-  <td class="spec">not found this session</td>
+  <td class="spec">18.1 lb/hp <span class="note">(3,620 lbs curb weight, Latitude/Sport/Limited 4x4, MY2025&ndash;2026, cars.com + MotorTrend &mdash; manually calculated)</span></td>
   <td>8-speed automatic</td>
   <td>AWD standard</td>
   <td class="price">$31,545 – $40,925</td>
@@ -347,7 +348,7 @@
   <td>1.6L turbo I4</td>
   <td class="spec">190 <span class="note">(Kia press release; a spec-panel figure of 195 hp appears in some sources)</span></td>
   <td class="spec">195</td>
-  <td class="spec">not found this session</td>
+  <td class="spec">17.1 lb/hp <span class="note">(3,248 lbs curb weight, SX AWD, MY2026, cars.com &mdash; manually calculated)</span></td>
   <td>8-speed automatic <span class="tag resolved">confirmed</span></td>
   <td>AWD standard on this trim</td>
   <td class="price">$31,490 <span class="note">(+$1,495 dest.)</span></td>
@@ -371,7 +372,7 @@
   <td>2.0L turbo I4</td>
   <td class="spec">228</td>
   <td class="spec">258</td>
-  <td class="spec">not found this session</td>
+  <td class="spec">17.9 lb/hp <span class="note">(4,085 lbs curb weight, Avenir AWD 228hp, MY2024&ndash;2026, cars.com; MY2023 Avenir AWD was lighter at 3,932 lbs/17.2 lb/hp, consistent across 3 independently-checked years so likely a genuine mid-cycle change &mdash; manually calculated)</span></td>
   <td>9-speed automatic</td>
   <td>AWD standard</td>
   <td class="price">$39,895 – $49,595</td>
@@ -395,7 +396,7 @@
   <td>2.0L turbo I4</td>
   <td class="spec">272</td>
   <td class="spec">280</td>
-  <td class="spec">not found this session</td>
+  <td class="spec">14.8 lb/hp <span class="note">(4,014 lbs curb weight, base SH-AWD 272hp, MY2024&ndash;2026, official Acura Fact Sheet PDFs; Technology trim is 14.9 lb/hp at 4,040 lbs &mdash; manually calculated)</span></td>
   <td>10-speed automatic</td>
   <td>Standard AWD (SH-AWD)</td>
   <td class="price">$46,550 – $56,300</td>
@@ -419,7 +420,7 @@
   <td>2.0L VC-Turbo I4</td>
   <td class="spec">268</td>
   <td class="spec">280</td>
-  <td class="spec">not found this session</td>
+  <td class="spec">14.8 lb/hp <span class="note">(3,968 lbs curb weight, Pure AWD 268hp, MY2023&ndash;2025, cars.com; discontinued after MY2025, no MY2026 model &mdash; manually calculated)</span></td>
   <td>CVT (Xtronic)</td>
   <td>AWD standard (FWD dropped 2025)</td>
   <td class="price">$44,350 – $52,550</td>
@@ -443,7 +444,7 @@
   <td>2.0L turbo I4</td>
   <td class="spec">250</td>
   <td class="spec">275</td>
-  <td class="spec">not found this session</td>
+  <td class="spec">14.7 lb/hp <span class="note">(3,685 lbs curb weight, base/Premiere trim FWD 250hp, MY2024&ndash;2026, cars.com; MY2023 Standard-trim FWD was 3,702 lbs/14.8 lb/hp &mdash; manually calculated)</span></td>
   <td>8-speed automatic</td>
   <td>FWD standard, AWD optional</td>
   <td class="price">$41,480 – $51,435</td>
@@ -971,7 +972,7 @@
   <td>2.5L turbo I4</td>
   <td class="spec">227 (87 oct) / 256 (93 oct)</td>
   <td class="spec">310 (87 oct) / 320 (93 oct)</td>
-  <td class="spec">not found this session</td>
+  <td class="spec">15.1 lb/hp <span class="note">(3,871 lbs curb weight &divide; 256hp @93 oct; 17.1 lb/hp using 227hp @87 oct; Turbo/Turbo Signature AWD, MY2025 &mdash; final year before the turbo engine was dropped for the MY2026 redesign; cars.com, 3,867 lbs for MY2023&ndash;2024 &mdash; manually calculated, resolved a prior "not found" gap)</span></td>
   <td>6-speed automatic</td>
   <td>AWD</td>
   <td class="price">~$34,000 – $41,000</td>
@@ -1067,7 +1068,7 @@
   <td>2.0L turbo I4</td>
   <td class="spec">237</td>
   <td class="spec">258</td>
-  <td class="spec">not found this session</td>
+  <td class="spec">16.4 lb/hp <span class="note">(3,882 lbs curb weight, Sport AWD 237hp, MY2024&ndash;2025 &mdash; production ended Jan 2025, no MY2026 model; cars.com; FWD Sport is lighter at 3,708 lbs/15.6 lb/hp &mdash; manually calculated, resolved a prior "not found" gap)</span></td>
   <td>9-speed automatic</td>
   <td>FWD or AWD</td>
   <td class="price">under $50k <span class="note">(exact range not re-itemized)</span></td>
@@ -1189,6 +1190,7 @@
   var priceSel = document.getElementById('f-price');
   var edgeToggle = document.getElementById('toggle-edge');
   var uncertainToggle = document.getElementById('toggle-uncertain');
+  var discontinuedToggle = document.getElementById('toggle-discontinued');
   var resetBtn = document.getElementById('reset-filters');
   var countEl = document.getElementById('filter-count');
 
@@ -1212,13 +1214,14 @@
       }
       if (edgeToggle.checked && row.classList.contains('edge')) matches = false;
       if (uncertainToggle.checked && row.classList.contains('uncertain')) matches = false;
+      if (discontinuedToggle.checked && row.classList.contains('discontinued')) matches = false;
       row.style.display = matches ? '' : 'none';
       if (matches) shown++;
     });
     countEl.textContent = shown + ' / ' + rows.length + ' shown';
   }
 
-  [segSel, tierSel, statusSel, priceSel, edgeToggle, uncertainToggle].forEach(function (el) {
+  [segSel, tierSel, statusSel, priceSel, edgeToggle, uncertainToggle, discontinuedToggle].forEach(function (el) {
     el.addEventListener('change', applyFilters);
   });
   resetBtn.addEventListener('click', function () {
@@ -1228,6 +1231,7 @@
     priceSel.value = '';
     edgeToggle.checked = false;
     uncertainToggle.checked = false;
+    discontinuedToggle.checked = false;
     applyFilters();
   });
 
