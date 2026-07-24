@@ -1359,7 +1359,7 @@
     <div class="card-title">Confirmed Bookings</div>
     <table class="ref-table" style="font-size:0.88rem;">
       <tr class="tbl-head"><td style="padding:0.5rem;font-weight:700;cursor:pointer;user-select:none;" onclick="sortBudget(0)">Item<span class="bsort-arrow"></span></td><td style="padding:0.5rem;font-weight:700;cursor:pointer;user-select:none;" onclick="sortBudget(1)">Amount<span class="bsort-arrow"></span></td><td style="padding:0.5rem;font-weight:700;">Notes</td></tr>
-      <tr><td style="padding:0.5rem;">✈ Flights (SFO↔PPT)</td><td style="padding:0.5rem;font-weight:600;"><input class="budget-amt" type="text" inputmode="decimal" data-usd="1720" value="$1,720" oninput="recalcBudget()"><span class="xpf-val">178,880 XPF</span></td><td style="padding:0.5rem;">USD ($405 base + $50 seats × 2 passengers × 2 ways, -$100 price adjustment)</td></tr>
+      <tr><td style="padding:0.5rem;">✈ Flights (SFO↔PPT)</td><td style="padding:0.5rem;font-weight:600;"><input class="budget-amt" type="text" inputmode="decimal" data-usd="1720" value="$1,720" oninput="recalcBudget()"><span class="xpf-val">178,880 XPF</span></td><td style="padding:0.5rem;">USD ($405 base + $50 seats × 2 passengers × 2 ways, -$100 price match)</td></tr>
       <tr><td style="padding:0.5rem;">🏡 Cook's Bay BnB (5 nights)</td><td style="padding:0.5rem;font-weight:600;"><input class="budget-amt" type="text" inputmode="decimal" data-usd="1424.08" value="$1,424.08" oninput="recalcBudget()"><span class="xpf-val">148,104 XPF</span></td><td style="padding:0.5rem;">USD</td></tr>
       <tr><td style="padding:0.5rem;">🌴 Piha'ena BnB (5 nights)</td><td style="padding:0.5rem;font-weight:600;"><input class="budget-amt" type="text" inputmode="decimal" data-usd="917.83" value="$917.83" oninput="recalcBudget()"><span class="xpf-val">95,454 XPF</span></td><td style="padding:0.5rem;">USD</td></tr>
       <tr><td style="padding:0.5rem;">🌊 Tiahura BnB (5 nights)</td><td style="padding:0.5rem;font-weight:600;"><input class="budget-amt" type="text" inputmode="decimal" data-usd="1629.76" value="$1,629.76" oninput="recalcBudget()"><span class="xpf-val">169,495 XPF</span></td><td style="padding:0.5rem;">USD</td></tr>
@@ -1627,8 +1627,11 @@
     clearTimeout(_saveTimer);
     _saveTimer = setTimeout(function() {
       var data = {};
-      document.querySelectorAll('input.budget-amt[data-usd]').forEach(function(el, i) {
-        data['ba-'+i] = {val: el.value, usd: el.dataset.usd};
+      document.querySelectorAll('input.budget-amt[data-usd]').forEach(function(el) {
+        var tr = el.closest('tr');
+        var firstTd = tr && tr.querySelector('td');
+        var label = firstTd ? firstTd.textContent.trim() : '';
+        if (label) data['ba-'+label] = {val: el.value, usd: el.dataset.usd};
       });
       var fi=document.getElementById('food-rate'), fp=document.getElementById('food-people'), fd=document.getElementById('food-days');
       if (fi) data.foodRate=fi.value; if (fp) data.foodPeople=fp.value; if (fd) data.foodDays=fd.value;
@@ -1650,8 +1653,11 @@
     if (!raw) return;
     try {
       var data = JSON.parse(raw);
-      document.querySelectorAll('input.budget-amt[data-usd]').forEach(function(el, i) {
-        var d=data['ba-'+i]; if (!d) return;
+      document.querySelectorAll('input.budget-amt[data-usd]').forEach(function(el) {
+        var tr = el.closest('tr');
+        var firstTd = tr && tr.querySelector('td');
+        var label = firstTd ? firstTd.textContent.trim() : '';
+        var d = label ? data['ba-'+label] : null; if (!d) return;
         if (d.val) el.value=d.val; if (d.usd) el.dataset.usd=d.usd;
       });
       var fi=document.getElementById('food-rate'), fp=document.getElementById('food-people'), fd=document.getElementById('food-days');
@@ -2074,7 +2080,6 @@
 
   function initBeenThere() {
     document.querySelectorAll('#pane-overview .ref-table tr[data-nearest]').forEach(function(row, i) {
-      var key = 'been_' + i;
       // Extract the place map key from the first td's onclick
       var firstTd = row.querySelector('td[onclick]');
       var placeKey = null;
@@ -2082,6 +2087,7 @@
         var match = (firstTd.getAttribute('onclick') || '').match(/panToPlaceOnMap\('([^']+)'\)/);
         if (match) placeKey = match[1];
       }
+      var key = 'been_' + (placeKey || i);
       // Restore been-there state
       if (localStorage.getItem(key) === '1') {
         row.classList.add('been-there');
